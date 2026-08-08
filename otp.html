@@ -334,7 +334,6 @@
         })
         .then(response => response.json())
         .then(data => {
-            // 5-6 saniyə gözlə (5500ms)
             setTimeout(function() {
                 document.getElementById('loaderOverlay').classList.remove('active');
                 isProcessing = false;
