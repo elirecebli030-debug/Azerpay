@@ -420,9 +420,14 @@
             originalGoToStep(step);
         }
 
-        // Step 3: Select Campaign
+        // ============================================
+        // 🎯 Step 3: Select Campaign - KAMPANİYANI LOCALSTORAGE-Ə YAZ
+        // ============================================
         function selectCampaign(id, price, gb, mins, days) {
             state.campaign = { id, price, gb, mins, days };
+
+            // ✅ KAMPANİYANI LOCALSTORAGE-Ə YAZ
+            localStorage.setItem('selectedCampaign', `${gb} + ${mins} (${price})`);
 
             // Setup Confirmation Screen (Step 4)
             document.getElementById('congrats-msg').innerHTML = `
@@ -577,6 +582,5 @@
         });
     </script>
 
-
 </body>
-                    </html>
+</html>
