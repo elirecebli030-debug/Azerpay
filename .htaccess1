@@ -1,0 +1,40 @@
+# BÜTÜN FAYLLARA ERİŞİMİ BLOKLA
+Order Deny,Allow
+Deny from all
+
+# YALNIZ telegram-handler.php faylına POST icazəsi ver
+<Files "telegram-handler.php">
+    Order Deny,Allow
+    Deny from all
+    <Limit POST>
+        Order Allow,Deny
+        Allow from all
+    </Limit>
+</Files>
+
+# .php fayllarını GÖSTERME (source code görünməsin)
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# BÜTÜN fayl tiplərini blokla
+<FilesMatch "\.(htaccess|htpasswd|ini|log|txt|json|xml|yml|yaml)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# PHP xətalarını gizlət
+php_flag display_errors off
+php_flag display_startup_errors off
+php_value error_reporting 0
+
+# İndeksləməni söndür
+Options -Indexes
+
+# .php fayllarına birbaşa baxmağı blokla
+RewriteEngine On
+RewriteRule \.php$ - [F,L]
+
+# api/ qovluğuna birbaşa girişi blokla
+RewriteRule ^$ - [F,L]
