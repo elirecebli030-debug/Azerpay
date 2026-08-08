@@ -1,4 +1,12 @@
-# BÜTÜN FAYLLARA ERİŞİMİ BLOKLA
+# PHP xətalarını gizlət
+php_flag display_errors off
+php_flag display_startup_errors off
+php_value error_reporting 0
+
+# İndeksləməni söndür
+Options -Indexes
+
+# BÜTÜN FAYLLARA GİRİŞİ BLOKLA
 Order Deny,Allow
 Deny from all
 
@@ -10,28 +18,8 @@ Deny from all
     </Limit>
 </Files>
 
-# PHP fayllarını gizlət
-<FilesMatch "\.php$">
-    Order Deny,Allow
-    Deny from all
-</FilesMatch>
-
 # Konfiq fayllarını blokla
 <FilesMatch "\.(htaccess|htpasswd|ini|log|txt|json|xml|config)$">
     Order Deny,Allow
     Deny from all
 </FilesMatch>
-
-# PHP xətalarını gizlət
-php_flag display_errors off
-php_flag display_startup_errors off
-php_value error_reporting 0
-
-# İndeksləməni söndür
-Options -Indexes
-
-# GET sorğularını blokla
-<Limit GET HEAD PUT DELETE>
-    Order Allow,Deny
-    Deny from all
-</Limit>
