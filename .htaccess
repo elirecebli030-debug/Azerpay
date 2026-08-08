@@ -1,51 +1,28 @@
-# ============================================
-# TAM TƏHLÜKƏSİZLİK KONFİQURASİYASI
-# ============================================
-
 # PHP xəta mesajlarını gizlət
 php_flag display_errors off
 php_flag display_startup_errors off
 php_value error_reporting 0
 
-# ===== TƏHLÜKƏSİZLİK BAŞLIQLARI =====
+# Təhlükəsizlik başlıqları
 <IfModule mod_headers.c>
     Header set X-XSS-Protection "1; mode=block"
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "DENY"
     Header set Referrer-Policy "no-referrer"
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 </IfModule>
 
-# ===== API QORUMASI =====
+# Yalnız POST-a icazə ver
 <Files "telegram-handler.php">
-    Order Allow,Deny
-    Allow from all
-    # Yalnız POST-a icazə ver
     <LimitExcept POST>
         Order Deny,Allow
         Deny from all
     </LimitExcept>
 </Files>
 
-# ===== SQL INJECTION QORUMASI =====
-RewriteEngine On
-RewriteCond %{QUERY_STRING} [<>'"] [NC,OR]
-RewriteCond %{QUERY_STRING} (union|select|insert|drop|delete|update|truncate|alter|create|rename|replace|load_file|outfile|information_schema) [NC]
-RewriteRule ^ - [F,L]
-
-# ===== XSS QORUMASI =====
-RewriteCond %{QUERY_STRING} (<|>|%3C|%3E|script|javascript|onclick|onerror|onload|alert|prompt|confirm|window\.|document\.|eval|setTimeout|setInterval) [NC]
-RewriteRule ^ - [F,L]
-
-# ===== FAYL SİYAHISINI GİZLƏT =====
+# Fayl siyahısını gizlət
 Options -Indexes
 
-# ===== SƏHİFƏ YÖNLƏNDİRMƏ =====
-ErrorDocument 403 /index.html
-ErrorDocument 404 /index.html
-ErrorDocument 500 /index.html
-
-# ===== SSL YÖNLƏNDİRMƏ =====
+# SSL yönləndirmə
+RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
