@@ -9,6 +9,7 @@ php_value error_reporting 0
     Header set Referrer-Policy "no-referrer"
 </IfModule>
 
+# Bot faylına POST icazəsi
 <Files "telegram-handler.php">
     <LimitExcept POST>
         Order Deny,Allow
